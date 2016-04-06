@@ -4,6 +4,7 @@ project(musicvisualizer)
 
 cmake_policy(SET CMP0028 NEW)
 
+add_definitions(-std=c++14)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -23,6 +24,8 @@ include_directories(src)
 find_package(Qt5Core PATHS ${CMAKE_PREFIX_PATH})
 find_package(Qt5Qml PATHS ${CMAKE_PREFIX_PATH})
 find_package(Qt5Quick PATHS ${CMAKE_PREFIX_PATH})
+find_package(Qt5Multimedia PATHS ${CMAKE_PREFIX_PATH})
+find_package(Qt5DataVisualization PATHS ${CMAKE_PREFIX_PATH})
 
 
 set(RESOURCE ${CMAKE_SOURCE_DIR}/src/qml.qrc)
@@ -31,4 +34,4 @@ qt5_add_resources(RESOURCE_ADDED ${RESOURCE} ${RESOURCE_ADDED})
 # Tell CMake to create the helloworld executable
 add_executable(musicvisualizer ${source} ${RESOURCE_ADDED})
 
-qt5_use_modules(musicvisualizer Core Qml Quick)
+qt5_use_modules(musicvisualizer Core Qml Quick Multimedia DataVisualization)
