@@ -31,7 +31,45 @@ find_package(Qt5DataVisualization PATHS ${CMAKE_PREFIX_PATH})
 set(RESOURCE ${CMAKE_SOURCE_DIR}/src/qml.qrc)
 qt5_add_resources(RESOURCE_ADDED ${RESOURCE} ${RESOURCE_ADDED})
 
-# Tell CMake to create the helloworld executable
 add_executable(musicvisualizer ${source} ${RESOURCE_ADDED})
 
 qt5_use_modules(musicvisualizer Core Qml Quick Multimedia DataVisualization)
+
+
+# Find fftw3
+
+find_path(FFTW3_INCLUDE_DIR
+    NAMES
+    fftw3.h
+    PATHS
+    /usr/include
+    /usr/local/include
+    /opt/local/include
+    /sw/include)
+
+find_library(FFTW3_LIBRARY
+    NAMES
+    fftw3
+    PATHS
+    /usr/lib
+    /usr/local/lib
+    /opt/local/lib
+    /sw/lib)
+
+
+set(FFTW3_INCLUDE_DIRS
+    ${FFTW3_INCLUDE_DIR})
+
+set(FFTW3_LIBRARIES
+    ${FFTW3_LIBRARY})
+
+if (FFTW3_INCLUDE_DIRS AND FFTW3_LIBRARIES)
+    set(FFTW3_FOUND true)
+endif (FFTW3_INCLUDE_DIRS AND FFTW3_LIBRARIES)
+
+if (NOT FFTW3_FOUND)
+    message(fatal_error "Could not find FFTW3!")
+endif (NOT FFTW3_FOUND)
+
+target_link_libraries(musicvisualizer ${FFTW3_LIBRARY})
+

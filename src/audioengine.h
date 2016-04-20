@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fftwrapper.h"
 #include "tonegenerator.h"
 #include "wavefilewriter.h"
 
@@ -35,6 +36,7 @@ private:
     QQueue<QAudioBuffer>             m_bufferQueue;
 
     WaveFileWriter                   m_fileWriter;
+    FFTWrapper                       m_fft;
 
     bool                             m_writeWavFile = false;
 

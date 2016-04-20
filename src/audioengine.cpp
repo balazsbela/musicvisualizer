@@ -170,6 +170,8 @@ void AudioEngine::processQueue()
                         m_fileWriter.write(static_cast<const char*>(buffer.data()) + totalBytesWritten, length);
                     }
 
+                    m_fft.feedBuffer(static_cast<const char*>(buffer.data()), length);
+
                     bytesRemaining -= written;
                     totalBytesWritten += written;
                 }
