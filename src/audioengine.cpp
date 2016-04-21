@@ -1,21 +1,28 @@
 #include "audioengine.h"
 
+#include <memory>
+
 #include <QAudioDeviceInfo>
 #include <QDebug>
 #include <QFile>
 #include <QDir>
 #include <QMetaObject>
 
-#include <memory>
 
 
 AudioEngine::AudioEngine(QObject* parent)
     : QObject(parent)
     , m_toneBuffer (new char[s_toneBufferSize])
-
 {
 }
 
+AudioEngine::~AudioEngine()
+{
+    if (m_toneBuffer)
+    {
+        delete[] m_toneBuffer;
+    }
+}
 
 void AudioEngine::setup()
 {
@@ -148,7 +155,6 @@ void AudioEngine::startToneGenerator()
     m_toneTimer.start();
 
 }
-
 
 
 void AudioEngine::startPlayback()

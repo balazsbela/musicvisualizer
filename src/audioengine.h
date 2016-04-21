@@ -19,13 +19,7 @@ class AudioEngine : QObject
 public:
 
     AudioEngine(QObject* parent = nullptr);
-    ~AudioEngine()
-    {
-        if (m_toneBuffer)
-        {
-            delete[] m_toneBuffer;
-        }
-    }
+    ~AudioEngine();
 
     void setup();
     void startPlayback();
