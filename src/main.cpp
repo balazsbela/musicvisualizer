@@ -7,6 +7,9 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
+
+    // TODO: Spawn a thread for this
+
     AudioEngine audioEngine(&app);
     audioEngine.setup();
 
