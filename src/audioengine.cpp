@@ -11,6 +11,8 @@
 
 AudioEngine::AudioEngine(QObject* parent)
     : QObject(parent)
+    , m_toneBuffer (new char[s_toneBufferSize])
+
 {
 }
 
@@ -119,7 +121,32 @@ void AudioEngine::startToneGenerator()
 {
     m_generator->start();
     m_audioOutput->stop();
-    m_audioOutput->start(m_generator);
+
+    m_device = m_audioOutput->start();
+
+    m_toneTimer.setInterval(10);
+    QObject::connect(&m_toneTimer, &QTimer::timeout, [&]()
+    {
+        m_generator->readData(m_toneBuffer, s_toneBufferSize);
+
+        QByteArray audioData;
+        audioData.setRawData(m_toneBuffer, s_toneBufferSize);
+
+        QAudioBuffer buffer(audioData, m_format);
+
+        if (m_bufferQueue.isEmpty())
+        {
+            m_bufferQueue.enqueue(buffer);
+            processQueue();
+        }
+        else
+        {
+            m_bufferQueue.enqueue(buffer);
+        }
+    });
+
+    m_toneTimer.start();
+
 }
 
 

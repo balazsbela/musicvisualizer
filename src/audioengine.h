@@ -9,6 +9,7 @@
 #include <QAudioOutput>
 #include <QScopedPointer>
 #include <QQueue>
+#include <QTimer>
 
 
 class AudioEngine : QObject
@@ -18,7 +19,13 @@ class AudioEngine : QObject
 public:
 
     AudioEngine(QObject* parent = nullptr);
-    ~AudioEngine() = default;
+    ~AudioEngine()
+    {
+        if (m_toneBuffer)
+        {
+            delete[] m_toneBuffer;
+        }
+    }
 
     void setup();
     void startPlayback();
@@ -27,6 +34,8 @@ public:
 private:
 
     void processQueue();
+
+    static const unsigned            s_toneBufferSize = 20 * 512;
 
     QAudioFormat                     m_format;
     QAudioDecoder                    m_decoder;
@@ -39,5 +48,8 @@ private:
     FFTWrapper                       m_fft;
 
     bool                             m_writeWavFile = false;
+
+    QTimer                           m_toneTimer;
+    char*                            m_toneBuffer = nullptr;
 
 };
