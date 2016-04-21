@@ -24,8 +24,6 @@ public:
 
 private:
 
-    unsigned m_currentWriteIndex = 0;
-
     fftw_complex* m_in;
     fftw_complex* m_out;
     fftw_plan m_plan;
