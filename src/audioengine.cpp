@@ -18,9 +18,12 @@ AudioEngine::AudioEngine(QObject* parent)
 
 AudioEngine::~AudioEngine()
 {
+    stop();
+
     if (m_toneBuffer)
     {
         delete[] m_toneBuffer;
+        m_toneBuffer = nullptr;
     }
 }
 
@@ -157,6 +160,15 @@ void AudioEngine::startToneGenerator()
 }
 
 
+void AudioEngine::stop()
+{
+    m_generator->stop();
+    m_toneTimer.stop();
+    m_decoder.stop();
+    m_audioOutput->stop();
+}
+
+
 void AudioEngine::startPlayback()
 {
     m_audioOutput->stop();
@@ -168,7 +180,6 @@ void AudioEngine::startPlayback()
     file.copy("test.mp3");
 
     m_decoder.setSourceFilename(QDir::currentPath() +"/test.mp3");
-
     m_device = m_audioOutput->start();
     m_decoder.start();
 }

@@ -9,8 +9,8 @@
 
 FFTWrapper::FFTWrapper()
 {
-    m_in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * s_fftInputSize);
-    m_out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * s_fftInputSize);
+    m_in = fftw_alloc_complex(s_fftInputSize);
+    m_out = fftw_alloc_complex(s_fftInputSize);
 
     m_plan = fftw_plan_dft_1d(int(s_fftInputSize), m_in, m_out, FFTW_FORWARD, FFTW_ESTIMATE);
 }
@@ -19,8 +19,18 @@ FFTWrapper::FFTWrapper()
 FFTWrapper::~FFTWrapper()
 {
     fftw_destroy_plan(m_plan);
-    fftw_free(m_in);
-    fftw_free(m_out);
+
+    if (m_out)
+    {
+        fftw_free(m_out);
+        m_out = nullptr;
+    }
+
+    if (m_in)
+    {
+        fftw_free(m_in);
+        m_in = nullptr;
+    }
 }
 
 
@@ -47,10 +57,11 @@ void FFTWrapper::feedBuffer(const char* audioBuffer, unsigned audioBufferSize)
         // Real part
         m_in[j][0] = isEven ? (audioBuffer[i] / 2 + audioBuffer[i + 1] / 2) / s_fftInputSampleCount
                             : (audioBuffer[i - 1] / 2 + audioBuffer[i] / 2) / s_fftInputSampleCount;
-        // Imaginary part
-        m_in[j][1] = 0;
 
-        if (j++ >= s_fftInputSize)
+        // Imaginary part
+        m_in[j][1] = 0.0;
+
+        if (j++ >= s_fftInputSize - 1)
         {
             // Input data buffer is populated, ready to feed
             break;

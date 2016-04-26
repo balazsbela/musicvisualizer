@@ -29,9 +29,10 @@ public:
 
 private:
 
-    fftw_complex* m_in;
-    fftw_complex* m_out;
     fftw_plan m_plan;
+
+    fftw_complex* m_in = nullptr;
+    fftw_complex* m_out = nullptr;
 
     QQueue<freq_band_result_t> m_resultQueue;
 

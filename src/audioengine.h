@@ -12,7 +12,7 @@
 #include <QTimer>
 
 
-class AudioEngine : QObject
+class AudioEngine : public QObject
 {
     Q_OBJECT
 
@@ -24,6 +24,7 @@ public:
     void setup();
     void startPlayback();
     void startToneGenerator();
+    void stop();
 
 private:
 
@@ -33,7 +34,7 @@ private:
 
     QAudioFormat                     m_format;
     QAudioDecoder                    m_decoder;
-    QIODevice*                       m_device;
+    QIODevice*                       m_device = nullptr;
     QAudioOutput*                    m_audioOutput = nullptr;
     ToneGenerator*                   m_generator = nullptr;
     QQueue<QAudioBuffer>             m_bufferQueue;
