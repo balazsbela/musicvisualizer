@@ -110,7 +110,7 @@ const void FFTWrapper::calculate()
 
     for (int i = 0; i < 16; ++i)
     {
-        rms[i] = float(rms[i]) / float(max);
+        rms[i] = max > 0 ? float(rms[i]) / float(max) : 0;
         qDebug() << i << rms[i];
     }
 
