@@ -72,5 +72,3 @@ if (NOT FFTW3_FOUND)
 endif (NOT FFTW3_FOUND)
 
 target_link_libraries(musicvisualizer ${FFTW3_LIBRARY})
-
-target_link_libraries(musicvisualizer "-lefence")
