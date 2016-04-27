@@ -7,7 +7,7 @@ namespace Visualizer {
 namespace Constants
 {
 
-    const unsigned bufferSize = 5 * 512;
+    const unsigned bufferSize = 10 * 512;
     const unsigned queueSize = 100;
 
     struct Event
