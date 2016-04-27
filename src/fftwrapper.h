@@ -23,7 +23,9 @@ public:
     using spectrum_result_t = std::array<long, s_fftInputSampleCount>;
     using freq_band_result_t = std::array<float, s_fftNumberOfBands>;
 
-    explicit FFTWrapper(Visualizer::Constants::queue_t& queue, QObject *parent = nullptr);
+    explicit FFTWrapper(Visualizer::Constants::sample_queue_t& inQueue,
+                        Visualizer::Constants::fft_result_queue_t& outQueue,
+                        QObject *parent = nullptr);
     ~FFTWrapper();
 
 
@@ -46,9 +48,8 @@ private:
     fftw_complex* m_in = nullptr;
     fftw_complex* m_out = nullptr;
 
-    QQueue<freq_band_result_t> m_resultQueue;
-
-    Visualizer::Constants::queue_t& m_queue;
+    Visualizer::Constants::sample_queue_t& m_inQueue;
+    Visualizer::Constants::fft_result_queue_t& m_outQueue;
 
     QTimer m_pullTimer;
 

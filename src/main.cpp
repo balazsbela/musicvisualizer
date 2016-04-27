@@ -1,34 +1,32 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QThread>
+#include <QtQml>
 
 #include <memory>
 
 #include "constants.h"
 #include "audioengine.h"
+#include "fftwrapper.h"
+#include "visualizationdata.h"
 
-
-const unsigned bufferSize = 5 * 512;
-const unsigned queueSize = 100;
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    QQmlApplicationEngine engine;
-    engine.addImportPath(":/qml/");
-    engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 
     // Set up communication through event queue
 
-    Visualizer::Constants::queue_t bufferQueue(100);
-
+    Visualizer::Constants::sample_queue_t bufferQueue(0);
+    Visualizer::Constants::fft_result_queue_t fftResultQueue(0);
 
     // Start audio thread
 
     QThread audioThread;
     AudioEngine audioEngine(bufferQueue);
     audioEngine.moveToThread(&audioThread);
+    // QObject::connect(&audioThread, &QThread::started, &audioEngine, &AudioEngine::startToneGenerator);
     QObject::connect(&audioThread, &QThread::started, &audioEngine, &AudioEngine::startPlayback);
     audioThread.start();
 
@@ -36,7 +34,7 @@ int main(int argc, char *argv[])
     // Start FFT Thread
 
     QThread fftThread;
-    FFTWrapper fft(bufferQueue);
+    FFTWrapper fft(bufferQueue, fftResultQueue);
     fft.moveToThread(&fftThread);
     QObject::connect(&fftThread, &QThread::started, &fft, &FFTWrapper::start);
     fftThread.start();
@@ -57,6 +55,15 @@ int main(int argc, char *argv[])
         fftThread.exit(0);
     });
 
+
+    VisualizationData visualization(fftResultQueue);
+
+    qmlRegisterUncreatableType<VisualizationData>("Visualizer", 1, 0, "VisualizationData", "");
+
+    QQmlApplicationEngine engine;
+    engine.addImportPath(":/qml/");
+    engine.rootContext()->setContextProperty(QStringLiteral("visualizationData"), &visualization);
+    engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 
     int result = app.exec();
 

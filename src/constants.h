@@ -8,7 +8,7 @@ namespace Constants
 {
 
     const unsigned bufferSize = 10 * 512;
-    const unsigned queueSize = 100;
+    const unsigned fftResultSize = 16;
 
     struct Event
     {
@@ -16,8 +16,10 @@ namespace Constants
         unsigned nrElements = 0;
     };
 
-    using queue_t = boost::lockfree::queue<Event>;
+    using sample_queue_t = boost::lockfree::queue<Event, boost::lockfree::fixed_sized<false>>;
 
+    using fft_result = std::array<float, fftResultSize>;
+    using fft_result_queue_t = boost::lockfree::queue<fft_result, boost::lockfree::fixed_sized<false>>;
 }
 
 }

@@ -1,7 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Window 2.2
 
-
 // Currently heavily based on this:
 // http://quitcoding.com/download/QUIt_GForceMeter_1.0.tgz
 // That may change
@@ -28,18 +27,42 @@ Window
         property alias ledWidth: ledScreen.ledWidth
         property alias ledHeight: ledScreen.ledHeight
 
-        property real value: 0.5
+        property real previousValue : 0.0
+
+        property real value: 0.0
         property real _peakValue: root.value
 
         property int  _updateFrequencyCounter: 0
-        property int  updateFrequency: 2
+        property int  updateFrequency: 3
+        property int index : 0
 
-        SequentialAnimation on value {
+        property int frameCounter : 0
+
+
+        NumberAnimation
+        {
+            from: root.previousValue;
+            to: root.value;
+            duration: 10;
+            easing.type: Easing.InOutQuad;
             running: true
-            loops: Animation.Infinite
-            NumberAnimation { from: 0.5; to: 1; duration: 300; easing.type: Easing.InOutQuad }
-            NumberAnimation { from: 1.0; to: 0.5; duration: 1000; easing.type: Easing.OutElastic }
-            NumberAnimation { from: 0.5; to: 0.2; duration: 2000; easing.type: Easing.InOutElastic }
+        }
+
+        Connections
+        {
+            target: visualizationData
+            onDataAvailable :
+            {
+                if (root.frameCounter === 0)
+                {
+                    root.previousValue = root.value;
+                    root.value = resultList[root.index];
+                    root.index = (root.index + 1) % resultList.length;
+                    // console.log(root.index + " " + root.previousValue + " " + root.value);
+                }
+                root.frameCounter = (root.frameCounter + 1) % 4;
+
+            }
         }
 
         onValueChanged: {

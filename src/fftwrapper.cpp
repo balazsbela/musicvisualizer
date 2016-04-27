@@ -7,9 +7,12 @@
 #include <QDebug>
 
 
-FFTWrapper::FFTWrapper(Visualizer::Constants::queue_t& queue, QObject* parent)
+FFTWrapper::FFTWrapper(Visualizer::Constants::sample_queue_t& inQueue,
+                       Visualizer::Constants::fft_result_queue_t& outQueue,
+                       QObject* parent)
     : QObject(parent)
-    , m_queue(queue)
+    , m_inQueue(inQueue)
+    , m_outQueue(outQueue)
 {
     m_in = fftw_alloc_complex(s_fftInputSize);
     m_out = fftw_alloc_complex(s_fftInputSize);
@@ -59,7 +62,7 @@ void FFTWrapper::pullBuffer()
 {
     Visualizer::Constants::Event event;
 
-    while (m_queue.pop(event))
+    while (m_inQueue.pop(event))
     {
         // Our buffer can be bigger, in case we can have multiple
         // sections of 512 samples in our buffer.
@@ -124,16 +127,16 @@ const void FFTWrapper::calculate()
         }
     }
 
-    qDebug() << "_____________________________";
+   // qDebug() << "_____________________________";
 
     // Normalize values
 
     for (int i = 0; i < 16; ++i)
     {
         rms[i] = max > 0 ? float(rms[i]) / float(max) : 0;
-        qDebug() << i << rms[i];
+        // qDebug() << i << rms[i];
     }
 
 
-    m_resultQueue.enqueue(std::move(rms));
+    m_outQueue.push(std::move(rms));
 }

@@ -8,7 +8,7 @@
 #include <QDir>
 
 
-AudioEngine::AudioEngine(Visualizer::Constants::queue_t& eventQueue, QObject* parent)
+AudioEngine::AudioEngine(Visualizer::Constants::sample_queue_t& eventQueue, QObject* parent)
     : QObject(parent)
     , m_toneBuffer (new char[s_toneBufferSize])
     , m_eventQueue(eventQueue)

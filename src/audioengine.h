@@ -1,8 +1,8 @@
 #pragma once
 
-#include "fftwrapper.h"
 #include "tonegenerator.h"
 #include "wavefilewriter.h"
+#include "constants.h"
 
 #include <QAudioFormat>
 #include <QAudioDecoder>
@@ -18,7 +18,7 @@ class AudioEngine : public QObject
 
 public:
 
-    explicit AudioEngine(Visualizer::Constants::queue_t& eventQueue, QObject* parent = nullptr);
+    explicit AudioEngine(Visualizer::Constants::sample_queue_t& eventQueue, QObject* parent = nullptr);
     ~AudioEngine();
 
     void setup();
@@ -53,5 +53,5 @@ private:
     QTimer                           m_toneTimer;
     char*                            m_toneBuffer = nullptr;
 
-    Visualizer::Constants::queue_t&  m_eventQueue;
+    Visualizer::Constants::sample_queue_t&  m_eventQueue;
 };
