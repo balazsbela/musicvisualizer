@@ -227,6 +227,7 @@ void AudioEngine::processQueue()
                     Visualizer::Constants::Event event;
 
                     Q_ASSERT(length < Visualizer::Constants::bufferSize);
+
                     const unsigned eventLength = std::min(unsigned(length), Visualizer::Constants::bufferSize);
                     event.nrElements = eventLength;
 
