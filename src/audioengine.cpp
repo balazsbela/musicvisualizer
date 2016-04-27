@@ -6,15 +6,18 @@
 #include <QDebug>
 #include <QFile>
 #include <QDir>
-#include <QMetaObject>
 
 
-
-AudioEngine::AudioEngine(QObject* parent)
+AudioEngine::AudioEngine(Visualizer::Constants::queue_t& eventQueue, QObject* parent)
     : QObject(parent)
     , m_toneBuffer (new char[s_toneBufferSize])
+    , m_eventQueue(eventQueue)
 {
+    m_toneTimer.setParent(this);
+    m_fileWriter.setParent(this);
+    m_decoder.setParent(this);
 }
+
 
 AudioEngine::~AudioEngine()
 {
@@ -26,6 +29,7 @@ AudioEngine::~AudioEngine()
         m_toneBuffer = nullptr;
     }
 }
+
 
 void AudioEngine::setup()
 {
@@ -129,6 +133,8 @@ void AudioEngine::setup()
 
 void AudioEngine::startToneGenerator()
 {
+    setup();
+
     m_generator->start();
     m_audioOutput->stop();
 
@@ -166,11 +172,15 @@ void AudioEngine::stop()
     m_toneTimer.stop();
     m_decoder.stop();
     m_audioOutput->stop();
+
+    emit stopped();
 }
 
 
 void AudioEngine::startPlayback()
 {
+    setup();
+
     m_audioOutput->stop();
 
     // TODO: Fix this, for some reason we can't set the resource file directly in the
@@ -214,7 +224,17 @@ void AudioEngine::processQueue()
                         m_fileWriter.write(static_cast<const char*>(buffer.data()) + totalBytesWritten, length);
                     }
 
-                    m_fft.feedBuffer(static_cast<const char*>(buffer.data()), length);
+                    Visualizer::Constants::Event event;
+
+                    const unsigned eventLength = std::min(unsigned(length), Visualizer::Constants::bufferSize);
+                    event.nrElements = eventLength;
+
+                    for (int i = 0; i < eventLength; ++i)
+                    {
+                        event.data[i] = static_cast<const int*>(buffer.data())[i];
+                    }
+
+                    m_eventQueue.push(event);
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;

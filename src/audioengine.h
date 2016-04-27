@@ -18,13 +18,20 @@ class AudioEngine : public QObject
 
 public:
 
-    AudioEngine(QObject* parent = nullptr);
+    explicit AudioEngine(Visualizer::Constants::queue_t& eventQueue, QObject* parent = nullptr);
     ~AudioEngine();
 
     void setup();
+
+public slots:
+
     void startPlayback();
     void startToneGenerator();
     void stop();
+
+signals:
+
+    void stopped();
 
 private:
 
@@ -40,11 +47,11 @@ private:
     QQueue<QAudioBuffer>             m_bufferQueue;
 
     WaveFileWriter                   m_fileWriter;
-    FFTWrapper                       m_fft;
 
     bool                             m_writeWavFile = false;
 
     QTimer                           m_toneTimer;
     char*                            m_toneBuffer = nullptr;
 
+    Visualizer::Constants::queue_t&  m_eventQueue;
 };

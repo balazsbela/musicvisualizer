@@ -14,10 +14,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 
-file(GLOB_RECURSE source src/*.cpp)
+file(GLOB_RECURSE sources src/*.cpp)
+file(GLOB_RECURSE headers src/*.h)
 
 include_directories(src)
-
 
 
 # Find the Qt libraries
@@ -31,7 +31,7 @@ find_package(Qt5DataVisualization PATHS ${CMAKE_PREFIX_PATH})
 set(RESOURCE ${CMAKE_SOURCE_DIR}/src/qml.qrc)
 qt5_add_resources(RESOURCE_ADDED ${RESOURCE} ${RESOURCE_ADDED})
 
-add_executable(musicvisualizer ${source} ${RESOURCE_ADDED})
+add_executable(musicvisualizer ${sources} ${headers} ${RESOURCE_ADDED})
 
 qt5_use_modules(musicvisualizer Core Qml Quick Multimedia DataVisualization)
 
