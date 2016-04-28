@@ -36,7 +36,7 @@ void AudioEngine::setup()
     m_format.setChannelCount(2);
     m_format.setCodec("audio/pcm");
     m_format.setSampleType(QAudioFormat::SignedInt);
-    m_format.setSampleRate(48000);
+    m_format.setSampleRate(Visualizer::Constants::sampleRate);
     m_format.setSampleSize(16);
 
     QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());

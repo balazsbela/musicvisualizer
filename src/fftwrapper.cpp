@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include <QtMath>
 #include <QDebug>
 
 
@@ -58,6 +59,21 @@ void FFTWrapper::stop()
 }
 
 
+double fromSignedInt(int value)
+{
+    const qint16  PCMS16MaxValue     =  32767;
+    const quint16 PCMS16MaxAmplitude =  32768; // because minimum is -32768
+
+    double f = (double) value / PCMS16MaxAmplitude;
+
+    if (f > 1.0) f = 1.0;
+    if (f < -1.0) f = -1.0;
+
+    return f;
+}
+
+
+
 void FFTWrapper::pullBuffer()
 {
     Visualizer::Constants::Event event;
@@ -76,9 +92,11 @@ void FFTWrapper::pullBuffer()
             // If we jumped an uneven number of samples, we need to mind the channel count
             const bool isEven = nrSections % 2 == 0 || i == 0;
 
+
+
             // Real part
-            m_in[j][0] = isEven ? (event.data[i] / 2 + event.data[i + 1] / 2) / s_fftInputSampleCount
-                                : (event.data[i - 1] / 2 + event.data[i] / 2) / s_fftInputSampleCount;
+            m_in[j][0] = isEven ? (fromSignedInt(event.data[i]) + fromSignedInt(event.data[i + 1])) / 2
+                                : (fromSignedInt(event.data[i - 1]) + fromSignedInt(event.data[i])) / 2;
 
             // Imaginary part
             m_in[j][1] = 0.0;
@@ -100,43 +118,25 @@ const void FFTWrapper::calculate()
 {
     fftw_execute(m_plan);
 
-    spectrum_result_t spectrum;
+    Visualizer::Constants::fft_result spectrum;
+
+    // qDebug() << "_________________________________________________";
+
+
+    double maxMagnitude = 0.0;
 
     for ( int i = 0 ; i < s_fftInputSampleCount; ++i )
     {
-        spectrum[i] = sqrt( pow(m_out[i][0],2) + pow(m_out[i][1],2) );
+        spectrum[i] = sqrt( m_out[i][0] * m_out[i][0] + m_out[i][1] * m_out[i][1] );
+        maxMagnitude = std::max(maxMagnitude, spectrum[i]);
     }
 
-    freq_band_result_t rms;
-    float max = 0;
-
-    for(int i = 0; i < s_fftNumberOfBands; ++i)
+    for (int i = 0; i < s_fftInputSampleCount; ++i)
     {
-        unsigned rootSum = 0;
-        for (int index = s_xscale[i]; index < s_xscale[i + 1]; index++)
-        {
-            rootSum += pow(spectrum[index], 2);
-        }
-
-        const unsigned numberOfValues = s_xscale[i + 1] - s_xscale[i];
-        rms[i] = sqrt(rootSum/numberOfValues);
-
-        if (rms[i] > max)
-        {
-            max = rms[i];
-        }
-    }
-
-   // qDebug() << "_____________________________";
-
-    // Normalize values
-
-    for (int i = 0; i < 16; ++i)
-    {
-        rms[i] = max > 0 ? float(rms[i]) / float(max) : 0;
-        // qDebug() << i << rms[i];
+        // qDebug() << i << " " << "Frequency: " << (i+1) * Visualizer::Constants::sampleRate / s_fftInputSize << " " << spectrum[i] / maxMagnitude;
+        spectrum[i] = spectrum[i] / maxMagnitude;
     }
 
 
-    m_outQueue.push(std::move(rms));
+    m_outQueue.push(std::move(spectrum));
 }

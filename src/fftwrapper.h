@@ -20,8 +20,8 @@ public:
     static const unsigned s_fftNumberOfBands = 16;
     const unsigned s_xscale[s_fftNumberOfBands + 1] = {0, 1, 2, 3, 5, 7, 10, 14, 20, 28, 40, 54, 74, 101, 137, 187, 255};
 
-    using spectrum_result_t = std::array<long, s_fftInputSampleCount>;
-    using freq_band_result_t = std::array<float, s_fftNumberOfBands>;
+    using spectrum_result_t = std::array<double, s_fftInputSampleCount>;
+    using freq_band_result_t = std::array<double, s_fftNumberOfBands>;
 
     explicit FFTWrapper(Visualizer::Constants::sample_queue_t& inQueue,
                         Visualizer::Constants::fft_result_queue_t& outQueue,

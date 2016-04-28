@@ -27,13 +27,11 @@ Window
         property alias ledWidth: ledScreen.ledWidth
         property alias ledHeight: ledScreen.ledHeight
 
-        property real previousValue : 0.0
-
         property real value: 0.0
         property real _peakValue: root.value
 
         property int  _updateFrequencyCounter: 0
-        property int  updateFrequency: 3
+        property int  updateFrequency: 2
         property int index : 0
 
         property int frameCounter : 0
@@ -53,15 +51,9 @@ Window
             target: visualizationData
             onDataAvailable :
             {
-                if (root.frameCounter === 0)
-                {
-                    root.previousValue = root.value;
-                    root.value = resultList[root.index];
-                    root.index = (root.index + 1) % resultList.length;
-                    // console.log(root.index + " " + root.previousValue + " " + root.value);
-                }
-                root.frameCounter = (root.frameCounter + 1) % 4;
-
+                root.value = resultList[root.index];
+                root.index = (root.index + 1) % resultList.length;
+                console.log(root.index + " " + root.value);
             }
         }
 

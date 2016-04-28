@@ -26,10 +26,9 @@ int main(int argc, char *argv[])
     QThread audioThread;
     AudioEngine audioEngine(bufferQueue);
     audioEngine.moveToThread(&audioThread);
-    // QObject::connect(&audioThread, &QThread::started, &audioEngine, &AudioEngine::startToneGenerator);
+  //  QObject::connect(&audioThread, &QThread::started, &audioEngine, &AudioEngine::startToneGenerator);
     QObject::connect(&audioThread, &QThread::started, &audioEngine, &AudioEngine::startPlayback);
     audioThread.start();
-
 
     // Start FFT Thread
 
