@@ -25,7 +25,6 @@ find_package(Qt5Core PATHS ${CMAKE_PREFIX_PATH})
 find_package(Qt5Qml PATHS ${CMAKE_PREFIX_PATH})
 find_package(Qt5Quick PATHS ${CMAKE_PREFIX_PATH})
 find_package(Qt5Multimedia PATHS ${CMAKE_PREFIX_PATH})
-find_package(Qt5DataVisualization PATHS ${CMAKE_PREFIX_PATH})
 
 
 set(RESOURCE ${CMAKE_SOURCE_DIR}/src/qml.qrc)
@@ -33,7 +32,7 @@ qt5_add_resources(RESOURCE_ADDED ${RESOURCE} ${RESOURCE_ADDED})
 
 add_executable(musicvisualizer ${sources} ${headers} ${RESOURCE_ADDED})
 
-qt5_use_modules(musicvisualizer Core Qml Quick Multimedia DataVisualization)
+qt5_use_modules(musicvisualizer Core Qml Quick Multimedia)
 
 
 # Find fftw3

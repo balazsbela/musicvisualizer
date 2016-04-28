@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/lockfree/queue.hpp>
+#include <array>
 
 namespace Visualizer {
 
