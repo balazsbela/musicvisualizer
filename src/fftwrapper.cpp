@@ -73,7 +73,6 @@ double fromSignedInt(int value)
 }
 
 
-
 void FFTWrapper::pullBuffer()
 {
     Visualizer::Constants::Event event;
@@ -81,18 +80,17 @@ void FFTWrapper::pullBuffer()
     while (m_inQueue.pop(event))
     {
         // Our buffer can be bigger, in case we can have multiple
-        // sections of 512 samples in our buffer.
+        // sections of nrSamples samples in our buffer.
         // We collect a sample from each until the fft input buffer is populated
 
         const unsigned nrSections = event.nrElements / s_fftInputSize;
+
         unsigned j = 0;
 
         for (int i = 0; i < event.nrElements; i+= nrSections)
         {
             // If we jumped an uneven number of samples, we need to mind the channel count
             const bool isEven = nrSections % 2 == 0 || i == 0;
-
-
 
             // Real part
             m_in[j][0] = isEven ? (fromSignedInt(event.data[i]) + fromSignedInt(event.data[i + 1])) / 2
@@ -120,12 +118,12 @@ const void FFTWrapper::calculate()
 
     Visualizer::Constants::fft_result spectrum;
 
-    // qDebug() << "_________________________________________________";
+    qDebug() << "_________________________________________________";
 
 
     double maxMagnitude = 0.0;
 
-    for ( int i = 0 ; i < s_fftInputSampleCount; ++i )
+    for (int i = 0 ; i < s_fftInputSampleCount; ++i )
     {
         spectrum[i] = sqrt( m_out[i][0] * m_out[i][0] + m_out[i][1] * m_out[i][1] );
         maxMagnitude = std::max(maxMagnitude, spectrum[i]);
@@ -133,10 +131,11 @@ const void FFTWrapper::calculate()
 
     for (int i = 0; i < s_fftInputSampleCount; ++i)
     {
-        // qDebug() << i << " " << "Frequency: " << (i+1) * Visualizer::Constants::sampleRate / s_fftInputSize << " " << spectrum[i] / maxMagnitude;
+        qDebug() << i << " " << "Frequency: " << (i+1) * Visualizer::Constants::sampleRate / s_fftInputSize << " " << spectrum[i] / maxMagnitude;
         spectrum[i] = spectrum[i] / maxMagnitude;
     }
 
+    //qDebug() << "_________________________________________________";
 
     m_outQueue.push(std::move(spectrum));
 }

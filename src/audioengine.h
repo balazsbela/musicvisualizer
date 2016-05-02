@@ -36,6 +36,8 @@ signals:
 private:
 
     void processQueue();
+    void sendToFFT(const auto& buffer, const qint64 length);
+
 
     static const unsigned            s_toneBufferSize = 20 * 512;
 

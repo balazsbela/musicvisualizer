@@ -36,16 +36,6 @@ Window
 
         property int frameCounter : 0
 
-
-        NumberAnimation
-        {
-            from: root.previousValue;
-            to: root.value;
-            duration: 10;
-            easing.type: Easing.InOutQuad;
-            running: true
-        }
-
         Connections
         {
             target: visualizationData
@@ -53,7 +43,7 @@ Window
             {
                 root.value = resultList[root.index];
                 root.index = (root.index + 1) % resultList.length;
-                console.log(root.index + " " + root.value);
+                // console.log(root.index + " " + root.value);
             }
         }
 

@@ -195,6 +195,24 @@ void AudioEngine::startPlayback()
 }
 
 
+void AudioEngine::sendToFFT(const auto& buffer, const qint64 length)
+{
+    Visualizer::Constants::Event event;
+
+    Q_ASSERT(length < Visualizer::Constants::bufferSize);
+    const unsigned eventLength = std::min(unsigned(length), Visualizer::Constants::bufferSize);
+
+    event.nrElements = eventLength;
+
+    for (int i = 0; i < eventLength; ++i)
+    {
+        event.data[i] = static_cast<const int*>(buffer.data())[i];
+    }
+
+    m_eventQueue.push(event);
+}
+
+
 void AudioEngine::processQueue()
 {
     while (!m_bufferQueue.isEmpty())
@@ -224,19 +242,8 @@ void AudioEngine::processQueue()
                         m_fileWriter.write(static_cast<const char*>(buffer.data()) + totalBytesWritten, length);
                     }
 
-                    Visualizer::Constants::Event event;
-
-                    Q_ASSERT(length < Visualizer::Constants::bufferSize);
-
-                    const unsigned eventLength = std::min(unsigned(length), Visualizer::Constants::bufferSize);
-                    event.nrElements = eventLength;
-
-                    for (int i = 0; i < eventLength; ++i)
-                    {
-                        event.data[i] = static_cast<const int*>(buffer.data())[i];
-                    }
-
-                    m_eventQueue.push(event);
+                    // TODO: Fix this but also keep it fixed size
+                    sendToFFT(buffer, 5 * 512);
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;
