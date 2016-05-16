@@ -195,22 +195,14 @@ void AudioEngine::startPlayback()
 }
 
 
-void AudioEngine::sendToFFT(const QByteArray& buffer)
+void AudioEngine::sendToFFT(const QAudioBuffer& buffer)
 {
-    QDataStream inputStream(buffer);
-    inputStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
-    const unsigned sampleSize = m_format.bytesPerFrame() / m_format.channelCount();
-    const unsigned sampleCount = buffer.length() / sampleSize;
-    Visualizer::Constants::sample_t sample = 0;
-
+    const qint16 *samples = buffer.constData<qint16>();
     m_fftEvent.nrChannels = m_format.channelCount();
 
-    for (int i = 0; i < sampleCount; ++i)
+    for (int i = 0; i < buffer.sampleCount(); ++i)
     {
-        inputStream >> sample;
-
-        m_fftEvent.data[m_fftEvent.nrElements++] = sample;
+        m_fftEvent.data[m_fftEvent.nrElements++] = samples[i];
 
         if (m_fftEvent.nrElements == Visualizer::Constants::fftBufferSize)
         {
@@ -235,7 +227,10 @@ void AudioEngine::processQueue()
         QDataStream instream(byteArray);
         instream.setFloatingPointPrecision(QDataStream::SinglePrecision);
 
-        const int nrSamples = buffer.sampleCount();
+
+        // Send to FFT thread for analysis.
+        sendToFFT(buffer);
+
 
         while (bytesRemaining > 0)
         {
@@ -260,28 +255,7 @@ void AudioEngine::processQueue()
                         m_fileWriter.write(currentPosition, length);
                     }
 
-                    // Send to FFT thread for analysis.
-
-                    sendToFFT(QByteArray(currentPosition, length));
-
-                    qint64 written = 0;
-                    Visualizer::Constants::sample_t sample = 0.0f;
-                    QByteArray outputArray;
-                    const QByteArray byteArray(currentPosition, length);
-                    QDataStream outstream(&outputArray, QIODevice::WriteOnly);
-                    QDataStream instream(byteArray);
-
-                    outstream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-                    instream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
-                    for (int i=0; i < nrSamples; ++i)
-                    {
-                        instream >> sample;
-                        outstream << sample;
-                    }
-
-                    written += m_device->write(outputArray);
-                    // written = m_device->write(currentPosition, nrSamples * sampleSize);
+                    qint64 written = m_device->write(currentPosition, nrSamples * sampleSize);
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;

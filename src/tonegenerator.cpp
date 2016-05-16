@@ -102,7 +102,7 @@ void ToneGenerator::generateData(const QAudioFormat &format, qint64 durationUs, 
     m_buffer.resize(length);
 
 
-    if (false && format.byteOrder() == QAudioFormat::LittleEndian &&
+    if (format.byteOrder() == QAudioFormat::LittleEndian &&
         format.codec() == "audio/pcm" &&
         format.sampleType() == QAudioFormat::SignedInt &&
         format.sampleSize() == 16)

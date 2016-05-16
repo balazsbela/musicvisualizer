@@ -11,7 +11,7 @@ namespace Constants
 {
 
     const unsigned sampleRate = 44100;
-    const unsigned fftNrSamples = 1024;
+    const unsigned fftNrSamples = 512;
     const unsigned fftResultSize = fftNrSamples / 2;
     const unsigned fftBufferSize = 1 * fftNrSamples;
 

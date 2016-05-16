@@ -36,7 +36,7 @@ signals:
 private:
 
     void processQueue();
-    void sendToFFT(const QByteArray& buffer);
+    void sendToFFT(const QAudioBuffer& buffer);
     bool pushEventIfBufferFull();
 
 

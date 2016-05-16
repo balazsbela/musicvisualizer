@@ -128,7 +128,6 @@ void FFTWrapper::pullBuffer()
         }
         else
         {
-
             const unsigned lastIndex = isEven ? event.nrElements - 1 : event.nrElements;
             for (int i = 0; i < lastIndex; i+= nrSections)
             {
@@ -161,7 +160,7 @@ void FFTWrapper::calculate()
 
     Visualizer::Constants::fft_result spectrum;
 
-    // qDebug() << "_________________________________________________";
+//    qDebug() << "_________________________________________________";
 
     double maxMagnitude = 0.0;
 
@@ -171,10 +170,10 @@ void FFTWrapper::calculate()
         maxMagnitude = std::max(maxMagnitude, spectrum[i]);
     }
 
-    const float binFrequencySize =  Visualizer::Constants::sampleRate / 2 / s_fftInputSampleCount;
+//   const float binFrequencySize =  Visualizer::Constants::sampleRate / s_fftInputSize;
     for (int i = 2; i <= s_fftInputSampleCount; ++i)
     {
-        // qDebug() << i << " " << "Frequency: " << float(i) * binFrequencySize << "-" << float(i+1) * binFrequencySize << " " << spectrum[i] / maxMagnitude;
+//        qDebug() << i << " " << "Frequency: " << float(i) * binFrequencySize << "-" << float(i+1) * binFrequencySize << " " << spectrum[i] / maxMagnitude;
         spectrum[i] = spectrum[i] / maxMagnitude;
     }
 
