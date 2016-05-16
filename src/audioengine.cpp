@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QDir>
+#include <QDataStream>
 
 
 AudioEngine::AudioEngine(Visualizer::Constants::sample_queue_t& eventQueue, QObject* parent)
@@ -33,10 +34,11 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::setup()
 {
-    m_format.setChannelCount(2);
+    m_format.setChannelCount(1);
     m_format.setCodec("audio/pcm");
     m_format.setSampleType(QAudioFormat::SignedInt);
     m_format.setSampleRate(Visualizer::Constants::sampleRate);
+    m_format.setByteOrder(QAudioFormat::LittleEndian);
     m_format.setSampleSize(16);
 
     QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
@@ -150,14 +152,11 @@ void AudioEngine::startToneGenerator()
 
         QAudioBuffer buffer(audioData, m_format);
 
-        if (m_bufferQueue.isEmpty())
+        m_bufferQueue.enqueue(buffer);
+
+        if (!m_bufferQueue.isEmpty())
         {
-            m_bufferQueue.enqueue(buffer);
             processQueue();
-        }
-        else
-        {
-            m_bufferQueue.enqueue(buffer);
         }
     });
 
@@ -187,6 +186,7 @@ void AudioEngine::startPlayback()
     // decoder, so we copy the file from the resources into the current directory
 
     QFile file(":/test.mp3");
+//    QFile file(":/440hz.wav");
     file.copy("test.mp3");
 
     m_decoder.setSourceFilename(QDir::currentPath() +"/test.mp3");
@@ -195,21 +195,29 @@ void AudioEngine::startPlayback()
 }
 
 
-void AudioEngine::sendToFFT(const auto& buffer, const qint64 length)
+void AudioEngine::sendToFFT(const QByteArray& buffer)
 {
-    Visualizer::Constants::Event event;
+    QDataStream inputStream(buffer);
+    inputStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
 
-    Q_ASSERT(length < Visualizer::Constants::bufferSize);
-    const unsigned eventLength = std::min(unsigned(length), Visualizer::Constants::bufferSize);
+    const unsigned sampleSize = m_format.bytesPerFrame() / m_format.channelCount();
+    const unsigned sampleCount = buffer.length() / sampleSize;
+    Visualizer::Constants::sample_t sample = 0;
 
-    event.nrElements = eventLength;
+    m_fftEvent.nrChannels = m_format.channelCount();
 
-    for (int i = 0; i < eventLength; ++i)
+    for (int i = 0; i < sampleCount; ++i)
     {
-        event.data[i] = static_cast<const int*>(buffer.data())[i];
-    }
+        inputStream >> sample;
 
-    m_eventQueue.push(event);
+        m_fftEvent.data[m_fftEvent.nrElements++] = sample;
+
+        if (m_fftEvent.nrElements == Visualizer::Constants::fftBufferSize)
+        {
+            m_eventQueue.push(m_fftEvent);
+            m_fftEvent.nrElements = 0;
+        }
+    }
 }
 
 
@@ -222,6 +230,13 @@ void AudioEngine::processQueue()
         qint64 bytesRemaining = buffer.byteCount();
         qint64 totalBytesWritten = 0;
 
+        Visualizer::Constants::sample_t sample = 0.0f;
+        const QByteArray byteArray(static_cast<const char*>(buffer.constData()),  buffer.byteCount());
+        QDataStream instream(byteArray);
+        instream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+
+        const int nrSamples = buffer.sampleCount();
+
         while (bytesRemaining > 0)
         {
             if (m_audioOutput->state() == QAudio::StoppedState)
@@ -230,20 +245,43 @@ void AudioEngine::processQueue()
             }
 
             int chunks = m_audioOutput->bytesFree() / m_audioOutput->periodSize();
+
             while (chunks > 0 && bytesRemaining > 0)
             {
                 const qint64 length = qMin(bytesRemaining, qint64(m_audioOutput->periodSize()));
                 if (length > 0)
                 {
-                    qint64 written = m_device->write(static_cast<const char*>(buffer.data()) + totalBytesWritten, length);
+                    const char* currentPosition = static_cast<const char*>(buffer.constData()) + totalBytesWritten;
+                    const unsigned sampleSize = m_format.bytesPerFrame() / m_format.channelCount();
+                    const unsigned nrSamples = length / sampleSize;
 
                     if (m_writeWavFile)
                     {
-                        m_fileWriter.write(static_cast<const char*>(buffer.data()) + totalBytesWritten, length);
+                        m_fileWriter.write(currentPosition, length);
                     }
 
-                    // TODO: Fix this but also keep it fixed size
-                    sendToFFT(buffer, 5 * 512);
+                    // Send to FFT thread for analysis.
+
+                    sendToFFT(QByteArray(currentPosition, length));
+
+                    qint64 written = 0;
+                    Visualizer::Constants::sample_t sample = 0.0f;
+                    QByteArray outputArray;
+                    const QByteArray byteArray(currentPosition, length);
+                    QDataStream outstream(&outputArray, QIODevice::WriteOnly);
+                    QDataStream instream(byteArray);
+
+                    outstream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+                    instream.setFloatingPointPrecision(QDataStream::SinglePrecision);
+
+                    for (int i=0; i < nrSamples; ++i)
+                    {
+                        instream >> sample;
+                        outstream << sample;
+                    }
+
+                    written += m_device->write(outputArray);
+                    // written = m_device->write(currentPosition, nrSamples * sampleSize);
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;

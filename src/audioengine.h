@@ -36,8 +36,11 @@ signals:
 private:
 
     void processQueue();
-    void sendToFFT(const auto& buffer, const qint64 length);
+    void sendToFFT(const QByteArray& buffer);
+    bool pushEventIfBufferFull();
 
+
+    Visualizer::Constants::Event     m_fftEvent;
 
     static const unsigned            s_toneBufferSize = 20 * 512;
 

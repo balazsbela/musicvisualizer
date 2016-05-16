@@ -24,6 +24,8 @@ private:
     void generateData(const QAudioFormat &format, qint64 durationUs, int sampleRate);
 
 private:
+
+    qreal m_phase = 0.0;
     qint64 m_pos;
     QByteArray m_buffer;
 };

@@ -15,13 +15,14 @@ Q_OBJECT;
 
 public:
 
-    static const unsigned s_fftInputSize = 512;
-    static const unsigned s_fftInputSampleCount = s_fftInputSize / 2;
-    static const unsigned s_fftNumberOfBands = 16;
-    const unsigned s_xscale[s_fftNumberOfBands + 1] = {0, 1, 2, 3, 5, 7, 10, 14, 20, 28, 40, 54, 74, 101, 137, 187, 255};
+    static const unsigned s_fftInputSize = Visualizer::Constants::fftNrSamples;
+    static const unsigned s_fftInputSampleCount =  Visualizer::Constants::fftResultSize;
+
+    // static const unsigned s_fftNumberOfBands = 16;
+    // const unsigned s_xscale[s_fftNumberOfBands + 1] = {0, 1, 2, 3, 5, 7, 10, 14, 20, 28, 40, 54, 74, 101, 137, 187, 255};
 
     using spectrum_result_t = std::array<double, s_fftInputSampleCount>;
-    using freq_band_result_t = std::array<double, s_fftNumberOfBands>;
+    // using freq_band_result_t = std::array<double, s_fftNumberOfBands>;
 
     explicit FFTWrapper(Visualizer::Constants::sample_queue_t& inQueue,
                         Visualizer::Constants::fft_result_queue_t& outQueue,
@@ -40,8 +41,9 @@ signals:
     void stopped();
 
 private:
-    const void calculate();
 
+    void calculate();
+    void calculateWindow();
 
     fftw_plan m_plan;
 
@@ -52,5 +54,14 @@ private:
     Visualizer::Constants::fft_result_queue_t& m_outQueue;
 
     QTimer m_pullTimer;
+
+    std::array<double, s_fftInputSize> m_window;
+
+    enum WindowFunction {
+        NoWindow,
+        HannWindow
+    };
+
+    WindowFunction m_windowFunction = HannWindow;
 
 };

@@ -64,14 +64,14 @@ Window
                     color: model.color
                     height: model.val
 
-                    PropertyAnimation
-                    {
-                        target: rect
-                        property: "height"
-                        from: rect.height
-                        to: model.val
-                        duration: 100
-                    }
+//                    PropertyAnimation
+//                    {
+//                        target: rect
+//                        property: "height"
+//                        from: previousHeight
+//                        to: model.val
+//                        duration: 1000
+//                    }
 
                     width: 3
                     y : parent.height - model.val

@@ -10,14 +10,18 @@ namespace Visualizer {
 namespace Constants
 {
 
-    const unsigned sampleRate = 48000;
-    const unsigned bufferSize = 10 * 512;
-    const unsigned fftResultSize = 256;
+    const unsigned sampleRate = 44100;
+    const unsigned fftNrSamples = 1024;
+    const unsigned fftResultSize = fftNrSamples / 2;
+    const unsigned fftBufferSize = 1 * fftNrSamples;
+
+    using sample_t = qint16;
 
     struct Event
     {
-        std::array<int, bufferSize> data;
+        std::array<sample_t, fftBufferSize> data = {0};
         unsigned nrElements = 0;
+        unsigned nrChannels = 0;
     };
 
     using sample_queue_t = boost::lockfree::queue<Event, boost::lockfree::fixed_sized<false>>;

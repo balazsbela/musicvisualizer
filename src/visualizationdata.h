@@ -26,6 +26,5 @@ signals:
 private:
 
     Visualizer::Constants::fft_result_queue_t& m_queue;
-
-    QTimer  m_timer;
+    QTimer m_timer;
 };

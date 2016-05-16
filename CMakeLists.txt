@@ -6,6 +6,8 @@ cmake_policy(SET CMP0028 NEW)
 
 add_definitions(-std=c++14)
 
+set(CMAKE_BUILD_TYPE "Debug")
+
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
