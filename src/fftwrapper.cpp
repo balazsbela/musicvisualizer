@@ -170,7 +170,7 @@ void FFTWrapper::calculate()
         maxMagnitude = std::max(maxMagnitude, spectrum[i]);
     }
 
-//   const float binFrequencySize =  Visualizer::Constants::sampleRate / s_fftInputSize;
+//    const float binFrequencySize =  Visualizer::Constants::sampleRate / s_fftInputSize;
     for (int i = 2; i <= s_fftInputSampleCount; ++i)
     {
 //        qDebug() << i << " " << "Frequency: " << float(i) * binFrequencySize << "-" << float(i+1) * binFrequencySize << " " << spectrum[i] / maxMagnitude;

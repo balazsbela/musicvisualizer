@@ -6,7 +6,7 @@ VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& 
     : QObject(parent)
     , m_queue(queue)
 {
-    m_timer.setInterval(10);
+    m_timer.setInterval(0);
     m_timer.setSingleShot(false);
 
     QObject::connect(&m_timer, &QTimer::timeout, [&]()
@@ -18,7 +18,7 @@ VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& 
 
             for (int i = 0; i < Visualizer::Constants::fftResultSize; ++i)
             {
-                list.append(QVariant(result[i]));
+                list.append(qreal(result[i]));
             }
 
             emit dataAvailable(list);
