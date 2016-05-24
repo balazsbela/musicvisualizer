@@ -21,7 +21,7 @@ VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& 
                 list.append(qreal(result[i]));
             }
 
-            emit dataAvailable(list);
+            emit dataAvailable(std::move(list));
         }
     });
 

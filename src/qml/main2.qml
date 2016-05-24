@@ -51,7 +51,7 @@ Window
 
                 var ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, width, height);
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 5;
                 ctx.globalAlpha = 1.0;
 
                 ctx.save();
@@ -63,7 +63,7 @@ Window
                     ctx.strokeStyle = Qt.hsla(i / dataModel.count, 0.85, 0.45, 1.0);
                     ctx.fillStyle = ctx.strokeStyle;
 
-                    var x = i * 5;
+                    var x = i * 6;
                     var y = parent.height;
 
                     ctx.beginPath();
@@ -97,18 +97,18 @@ Window
                 UniformAnimator {
                     uniform: "interpolationFactor"
                     target: shaderItem
-                    from: 0.8
-                    to: 0.3
-                    duration: 10
+                    from: 0.75
+                    to: 1.0
+                    duration: 10000
                     easing.type: Easing.Linear
                 }
 
                 UniformAnimator {
                     uniform: "interpolationFactor"
                     target: shaderItem
-                    from: 0.8
-                    to: 0.2
-                    duration: 10
+                    from: 1.0
+                    to: 0.75
+                    duration: 10000
                     easing.type: Easing.Linear
                 }
             }
@@ -120,9 +120,10 @@ Window
                 uniform lowp sampler2D recursiveSource;
                 uniform lowp float interpolationFactor;
                 void main() {
-                    vec4 current = texture2D(source, qt_TexCoord0);
+                    vec4 current = texture2D(source, qt_TexCoord0) * 1.75;
                     vec4 previous = texture2D(recursiveSource, qt_TexCoord0);
-                    gl_FragColor = mix(previous, current, interpolationFactor) * qt_Opacity * 1.2;
+                    //gl_FragColor = qt_Opacity * mix(current, previous, 0.96);
+                    gl_FragColor = qt_Opacity * current;
                 }"
         }
 
