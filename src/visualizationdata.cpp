@@ -2,9 +2,11 @@
 
 
 VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& queue,
+                                     QQmlVariantListModel& model,
                                      QObject* parent)
     : QObject(parent)
     , m_queue(queue)
+    , m_model(model)
 {
     m_timer.setInterval(0);
     m_timer.setSingleShot(false);
@@ -14,14 +16,20 @@ VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& 
         Visualizer::Constants::fft_result result;
         while (m_queue.pop(result))
         {
-            QVariantList list;
-
             for (int i = 0; i < Visualizer::Constants::fftResultSize; ++i)
             {
-                list.append(qreal(result[i]));
-            }
+                QVariantMap element;
+                element["val"] = qreal(result[i]);
 
-            emit dataAvailable(std::move(list));
+                if (m_model.count() < i)
+                {
+                    m_model.append(element);
+                }
+                else
+                {
+                    m_model.replace(i, element);
+                }
+            }
         }
     });
 

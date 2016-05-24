@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QThread>
 #include <QtQml>
+#include <QSurfaceFormat>
 
 #include <memory>
 
@@ -13,6 +14,17 @@
 
 int main(int argc, char *argv[])
 {
+    // Disable vsync
+
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    format.setSwapInterval(0);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    format.setOptions(QSurfaceFormat::StereoBuffers);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setVersion(2, 9);
+    QSurfaceFormat::setDefaultFormat(format);
+
     QGuiApplication app(argc, argv);
 
     // Set up communication through event queue
@@ -54,13 +66,14 @@ int main(int argc, char *argv[])
     });
 
 
-    VisualizationData visualization(fftResultQueue);
+    QQmlVariantListModel model;
+    VisualizationData visualization(fftResultQueue, model);
 
-    qmlRegisterUncreatableType<VisualizationData>("Visualizer", 1, 0, "VisualizationData", "");
+    qmlRegisterType<QQmlVariantListModel>("visualizer.models", 1, 0, "QQmlVariantListModel");
 
     QQmlApplicationEngine engine;
     engine.addImportPath(":/qml/");
-    engine.rootContext()->setContextProperty(QStringLiteral("visualizationData"), &visualization);
+    engine.rootContext()->setContextProperty(QStringLiteral("dataModel"), &model);
     engine.load(QUrl(QStringLiteral("qrc:/qml/main2.qml")));
 
     int result = app.exec();

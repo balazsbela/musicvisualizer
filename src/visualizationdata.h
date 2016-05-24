@@ -1,6 +1,7 @@
 #pragma once
 
 #include "constants.h"
+#include "models/qqmlvariantlistmodel.h"
 
 #include <QObject>
 #include <QTimer>
@@ -14,18 +15,16 @@ Q_OBJECT;
 public:
 
     VisualizationData(Visualizer::Constants::fft_result_queue_t& queue,
+                      QQmlVariantListModel& model,
                       QObject* parent = nullptr);
 
     ~VisualizationData() = default;
-
-signals:
-
-    void dataAvailable(const QVariantList& resultList);
-
 
 private:
 
     Visualizer::Constants::fft_result_queue_t& m_queue;
     QTimer m_timer;
+
+    QQmlVariantListModel& m_model;
 
 };

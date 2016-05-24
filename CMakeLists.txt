@@ -16,7 +16,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 
-file(GLOB_RECURSE sources src/*.cpp)
+file(GLOB_RECURSE sources src/*.cpp src/models/*.cpp)
 file(GLOB_RECURSE headers src/*.h)
 
 include_directories(src)

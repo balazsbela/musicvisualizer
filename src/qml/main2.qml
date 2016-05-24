@@ -19,11 +19,6 @@ Window
 
         property bool pending: false
 
-        ListModel
-        {
-            id: dataModel
-        }
-
         Timer
         {
             running: true
@@ -44,38 +39,22 @@ Window
             antialiasing: true
             onPaint:
             {
-                if (!root.pending)
-                {
-                    return;
-                }
-
                 var ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, width, height);
                 ctx.lineWidth = 5;
                 ctx.globalAlpha = 1.0;
 
-                ctx.save();
-
                 for (var i = 0; i < dataModel.count; ++i)
                 {
                     var item = dataModel.get(i);
-
                     ctx.strokeStyle = Qt.hsla(i / dataModel.count, 0.85, 0.45, 1.0);
-                    ctx.fillStyle = ctx.strokeStyle;
 
                     var x = i * 6;
-                    var y = parent.height;
-
                     ctx.beginPath();
-                    ctx.moveTo(x, y);
+                    ctx.moveTo(x, parent.height);
                     ctx.lineTo(x, parent.height - 300 * item.val);
                     ctx.stroke();
                 }
-
-                ctx.restore();
-
-                root.pending = false;
-
             }
 
         }
@@ -136,27 +115,6 @@ Window
             smooth: true
             recursive: true
         }
-
-
-        Connections
-        {
-            target: visualizationData
-            onDataAvailable :
-            {
-                if (root.pending)
-                {
-                    return;
-                }
-
-                for (var i = 0; i < resultList.length; ++i)
-                {
-                    dataModel.set(i, {"val" : resultList[i]});
-                }
-
-                root.pending = true;
-            }
-        }
-
 
     }
 
