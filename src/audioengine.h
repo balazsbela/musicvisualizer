@@ -33,14 +33,20 @@ signals:
 
     void stopped();
 
-private:
+private slots:
 
     void processQueue();
-    void sendToFFT(const QAudioBuffer& buffer);
+
+private:
+
+    void sendToFFT(const QByteArray& buffer);
     bool pushEventIfBufferFull();
 
 
     Visualizer::Constants::Event     m_fftEvent;
+    QByteArray                       m_previousFFTBuffer;
+    unsigned                         m_previousSampleCount = 0;
+
 
     static const unsigned            s_toneBufferSize = 20 * 512;
 
@@ -50,6 +56,7 @@ private:
     QAudioOutput*                    m_audioOutput = nullptr;
     ToneGenerator*                   m_generator = nullptr;
     QQueue<QAudioBuffer>             m_bufferQueue;
+    QTimer                           m_audioOutputTimer;
 
     WaveFileWriter                   m_fileWriter;
 

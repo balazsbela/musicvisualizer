@@ -7,6 +7,10 @@
 #include <QFile>
 #include <QDir>
 #include <QDataStream>
+#include <QDebug>
+
+
+#define debugFFTChunks QNoDebug()
 
 
 AudioEngine::AudioEngine(Visualizer::Constants::sample_queue_t& eventQueue, QObject* parent)
@@ -17,6 +21,11 @@ AudioEngine::AudioEngine(Visualizer::Constants::sample_queue_t& eventQueue, QObj
     m_toneTimer.setParent(this);
     m_fileWriter.setParent(this);
     m_decoder.setParent(this);
+
+    m_audioOutputTimer.setParent(this);
+    m_audioOutputTimer.setInterval(15);
+    m_audioOutputTimer.setSingleShot(false);
+    QObject::connect(&m_audioOutputTimer, &QTimer::timeout, this, &AudioEngine::processQueue, Qt::QueuedConnection);
 }
 
 
@@ -110,17 +119,17 @@ void AudioEngine::setup()
             return;
         }
 
-        if (m_bufferQueue.isEmpty())
-        {
-            m_bufferQueue.enqueue(buffer);
-            processQueue();
-        }
-        else
-        {
-            m_bufferQueue.enqueue(buffer);
-        }
+        m_bufferQueue.enqueue(buffer);
 
     });
+
+
+    QObject::connect(&m_decoder, &QAudioDecoder::finished, [this]()
+    {
+        m_audioOutputTimer.start();
+    });
+
+
 
     QObject::connect(&m_decoder, &QAudioDecoder::finished, [this]()
     {
@@ -151,16 +160,11 @@ void AudioEngine::startToneGenerator()
         audioData.setRawData(m_toneBuffer, s_toneBufferSize);
 
         QAudioBuffer buffer(audioData, m_format);
-
         m_bufferQueue.enqueue(buffer);
-
-        if (!m_bufferQueue.isEmpty())
-        {
-            processQueue();
-        }
     });
 
     m_toneTimer.start();
+    m_audioOutputTimer.start();
 
 }
 
@@ -169,6 +173,7 @@ void AudioEngine::stop()
 {
     m_generator->stop();
     m_toneTimer.stop();
+    m_audioOutputTimer.stop();
     m_decoder.stop();
     m_audioOutput->stop();
 
@@ -192,30 +197,57 @@ void AudioEngine::startPlayback()
     m_decoder.setSourceFilename(QDir::currentPath() +"/test.mp3");
     m_device = m_audioOutput->start();
     m_decoder.start();
+
 }
 
 
-void AudioEngine::sendToFFT(const QAudioBuffer& buffer)
+void AudioEngine::sendToFFT(const QByteArray& buffer)
 {
-    const qint16 *samples = buffer.constData<qint16>();
-    m_fftEvent.nrChannels = m_format.channelCount();
+    QAudioBuffer current(buffer, m_format);
 
-    for (int i = 0; i < buffer.sampleCount(); ++i)
+    debugFFTChunks << "____________sendToFFT________________________";
+    debugFFTChunks << "Current buffer size:" << current.sampleCount();
+
+    m_previousFFTBuffer.append(buffer);
+    QAudioBuffer totalAudioBuffer(m_previousFFTBuffer, m_format);
+
+    debugFFTChunks << "Total size added to previous:" << totalAudioBuffer.sampleCount();
+
+    if (totalAudioBuffer.sampleCount() < Visualizer::Constants::fftBufferSize)
+    {
+        debugFFTChunks << "Not enough, saving for next round!";
+        return;
+    }
+
+    unsigned nrChunks = totalAudioBuffer.sampleCount() / Visualizer::Constants::fftBufferSize;
+    unsigned lastIndex = Visualizer::Constants::fftBufferSize * nrChunks;
+
+    debugFFTChunks << "Nr chunks:" << nrChunks << " last index:" << lastIndex;
+
+    m_fftEvent.nrChannels = m_format.channelCount();
+    const qint16 *samples = totalAudioBuffer.constData<qint16>();
+
+    for(int i = 0; i < lastIndex; ++i)
     {
         m_fftEvent.data[m_fftEvent.nrElements++] = samples[i];
-
         if (m_fftEvent.nrElements == Visualizer::Constants::fftBufferSize)
         {
+            debugFFTChunks << "Sending fft event";
+
             m_eventQueue.push(m_fftEvent);
             m_fftEvent.nrElements = 0;
         }
     }
+
+    debugFFTChunks << "Removed from 0 to " << lastIndex << " remaining: " << totalAudioBuffer.sampleCount() % Visualizer::Constants::fftBufferSize;
+
+    m_previousFFTBuffer =  m_previousFFTBuffer.remove(0, lastIndex * sizeof(qint16));
 }
 
 
 void AudioEngine::processQueue()
 {
-    while (!m_bufferQueue.isEmpty())
+    if (!m_bufferQueue.isEmpty())
     {
         const auto& buffer = m_bufferQueue.dequeue();
 
@@ -226,11 +258,6 @@ void AudioEngine::processQueue()
         const QByteArray byteArray(static_cast<const char*>(buffer.constData()),  buffer.byteCount());
         QDataStream instream(byteArray);
         instream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
-
-        // Send to FFT thread for analysis.
-        sendToFFT(buffer);
-
 
         while (bytesRemaining > 0)
         {
@@ -255,7 +282,22 @@ void AudioEngine::processQueue()
                         m_fileWriter.write(currentPosition, length);
                     }
 
-                    qint64 written = m_device->write(currentPosition, nrSamples * sampleSize);
+                    QByteArray rawBuffer;
+                    QDataStream stream(&rawBuffer, QIODevice::WriteOnly);
+                    qint64 written = stream.writeRawData(currentPosition, nrSamples * sampleSize);
+
+                    QAudioBuffer audioBuffer(rawBuffer, m_format);
+                    audioBuffer.duration();
+
+                    sendToFFT(rawBuffer);
+
+                    QTimer::singleShot(0, this, [this, &written, rawBuffer]()
+                    {
+                        written = m_device->write(rawBuffer);
+                    });
+
+                    m_audioOutputTimer.setInterval(audioBuffer.duration() / 1000);
+
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;

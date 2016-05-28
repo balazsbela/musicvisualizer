@@ -17,15 +17,34 @@ Window
         width: parent.width
         height: parent.height / 2
 
-        property bool pending: false
+
+        property int framesSinceModelReset: 0
+        property int maxFramesSinceModelReset: 0
+        property variant previousdata : []
+        property bool interpolate : false
+
+
+        Connections
+        {
+            target: dataModel
+            onModelReset:
+            {
+                root.maxFramesSinceModelReset = root.framesSinceModelReset >
+                                                root.maxFramesSinceModelReset ? root.framesSinceModelReset
+                                                                              : root.maxFramesSinceModelReset
+                root.framesSinceModelReset = 0;
+            }
+
+        }
 
         Timer
         {
             running: true
-            interval: 15
+            interval: 10
             repeat: true
             onTriggered:
             {
+                root.framesSinceModelReset++;
                 canvas.requestPaint();
             }
         }
@@ -47,13 +66,25 @@ Window
                 for (var i = 0; i < dataModel.count; ++i)
                 {
                     var item = dataModel.get(i);
+
                     ctx.strokeStyle = Qt.hsla(i / dataModel.count, 0.85, 0.45, 1.0);
+
+
+                    var previous = root.previousdata[i] ? root.previousdata[i] : 0;
+
+                    var t = root.framesSinceModelReset.toFixed(2) / root.maxFramesSinceModelReset.toFixed(2);
+                    var current = root.interpolate ? (1 - t) * item.val + t * previous : item.val;
 
                     var x = i * 6;
                     ctx.beginPath();
                     ctx.moveTo(x, parent.height);
-                    ctx.lineTo(x, parent.height - 300 * item.val);
+                    ctx.lineTo(x, parent.height - 300 * current);
                     ctx.stroke();
+
+                    var delta = Math.abs(previous - item.val);
+                    //console.log(t + " prev " + previous + " current "+ item.val + " result " + current + " delta " + delta);
+
+                    root.previousdata[i] = item.val;
                 }
             }
 

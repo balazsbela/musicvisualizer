@@ -16,20 +16,16 @@ VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& 
         Visualizer::Constants::fft_result result;
         while (m_queue.pop(result))
         {
+            QVariantList list;
             for (int i = 0; i < Visualizer::Constants::fftResultSize; ++i)
             {
                 QVariantMap element;
                 element["val"] = qreal(result[i]);
 
-                if (m_model.count() < i)
-                {
-                    m_model.append(element);
-                }
-                else
-                {
-                    m_model.replace(i, element);
-                }
+                list.append(element);
             }
+
+            m_model.replaceList(list);;
         }
     });
 
