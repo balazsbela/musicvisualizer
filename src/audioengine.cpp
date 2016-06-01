@@ -21,11 +21,8 @@ AudioEngine::AudioEngine(Visualizer::Common::sample_queue_t& eventQueue, QObject
     m_toneTimer.setParent(this);
     m_fileWriter.setParent(this);
     m_decoder.setParent(this);
-
     m_audioOutputTimer.setParent(this);
-    m_audioOutputTimer.setInterval(15);
-    m_audioOutputTimer.setSingleShot(false);
-    QObject::connect(&m_audioOutputTimer, &QTimer::timeout, this, &AudioEngine::processQueue, Qt::QueuedConnection);
+
 }
 
 
@@ -139,6 +136,9 @@ void AudioEngine::setup()
         }
     });
 
+    m_audioOutputTimer.setInterval(15);
+    m_audioOutputTimer.setSingleShot(false);
+    QObject::connect(&m_audioOutputTimer, &QTimer::timeout, this, &AudioEngine::processQueue);
 }
 
 
@@ -165,7 +165,6 @@ void AudioEngine::startToneGenerator()
 
     m_toneTimer.start();
     m_audioOutputTimer.start();
-
 }
 
 
@@ -254,11 +253,6 @@ void AudioEngine::processQueue()
         qint64 bytesRemaining = buffer.byteCount();
         qint64 totalBytesWritten = 0;
 
-        Visualizer::Common::sample_t sample = 0.0f;
-        const QByteArray byteArray(static_cast<const char*>(buffer.constData()),  buffer.byteCount());
-        QDataStream instream(byteArray);
-        instream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-
         while (bytesRemaining > 0)
         {
             if (m_audioOutput->state() == QAudio::StoppedState)
@@ -291,13 +285,9 @@ void AudioEngine::processQueue()
 
                     sendToFFT(rawBuffer);
 
-                    QTimer::singleShot(0, this, [this, &written, rawBuffer]()
-                    {
-                        written = m_device->write(rawBuffer);
-                    });
+                    written = m_device->write(rawBuffer);
 
-                    m_audioOutputTimer.setInterval(audioBuffer.duration() / 1000);
-
+                   // m_audioOutputTimer.setInterval(audioBuffer.duration() / 1000);
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;

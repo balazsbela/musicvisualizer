@@ -15,14 +15,7 @@ FFTWrapper::FFTWrapper(Visualizer::Common::sample_queue_t& inQueue,
     , m_inQueue(inQueue)
     , m_outQueue(outQueue)
 {
-    m_in = fftw_alloc_complex(s_fftInputSize);
-    m_out = fftw_alloc_complex(s_fftInputSize);
-
-    m_plan = fftw_plan_dft_1d(s_fftInputSize, m_in, m_out, FFTW_FORWARD, FFTW_ESTIMATE);
-
     m_pullTimer.setParent(this);
-
-    calculateWindow();
 }
 
 
@@ -46,6 +39,14 @@ FFTWrapper::~FFTWrapper()
 
 void FFTWrapper::start()
 {
+    m_in = fftw_alloc_complex(s_fftInputSize);
+    m_out = fftw_alloc_complex(s_fftInputSize);
+
+    m_plan = fftw_plan_dft_1d(s_fftInputSize, m_in, m_out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+    calculateWindow();
+
+
     m_pullTimer.setInterval(0);
     m_pullTimer.setSingleShot(false);
     QObject::connect(&m_pullTimer, &QTimer::timeout, this, &FFTWrapper::pullBuffer);
