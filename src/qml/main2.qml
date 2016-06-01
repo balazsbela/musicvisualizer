@@ -32,6 +32,11 @@ Window
                 root.maxFramesSinceModelReset = root.framesSinceModelReset >
                                                 root.maxFramesSinceModelReset ? root.framesSinceModelReset
                                                                               : root.maxFramesSinceModelReset
+                if (root.maxFramesSinceModelReset > 4)
+                {
+                    root.maxFramesSinceModelReset = 4;
+                }
+
                 root.framesSinceModelReset = 0;
             }
 
@@ -44,7 +49,6 @@ Window
             repeat: true
             onTriggered:
             {
-                root.framesSinceModelReset++;
                 canvas.requestPaint();
             }
         }
@@ -66,14 +70,14 @@ Window
                 for (var i = 0; i < dataModel.count; ++i)
                 {
                     var item = dataModel.get(i);
-
                     ctx.strokeStyle = Qt.hsla(i / dataModel.count, 0.85, 0.45, 1.0);
-
 
                     var previous = root.previousdata[i] ? root.previousdata[i] : 0;
 
                     var t = root.framesSinceModelReset.toFixed(2) / root.maxFramesSinceModelReset.toFixed(2);
                     var current = root.interpolate ? (1 - t) * item.val + t * previous : item.val;
+
+//                    console.log(root.framesSinceModelReset.toFixed(2) + " " + root.maxFramesSinceModelReset.toFixed(2) + " " + t);
 
                     var x = i * 6;
                     ctx.beginPath();
@@ -86,6 +90,7 @@ Window
 
                     root.previousdata[i] = item.val;
                 }
+                root.framesSinceModelReset++;
             }
 
         }

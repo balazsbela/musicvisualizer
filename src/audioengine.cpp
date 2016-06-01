@@ -22,7 +22,6 @@ AudioEngine::AudioEngine(Visualizer::Common::sample_queue_t& eventQueue, QObject
     m_fileWriter.setParent(this);
     m_decoder.setParent(this);
     m_audioOutputTimer.setParent(this);
-
 }
 
 
@@ -237,6 +236,8 @@ void AudioEngine::sendToFFT(const QByteArray& buffer)
 
             m_eventQueue.push(m_fftEvent);
             m_fftEvent.nrElements = 0;
+
+            m_fftBufferIndex = (m_fftBufferIndex + 1) % 10;
         }
     }
 
