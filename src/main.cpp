@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.addImportPath(":/qml/");
     engine.rootContext()->setContextProperty(QStringLiteral("dataModel"), &model);
-    engine.load(QUrl(QStringLiteral("qrc:/qml/main2.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 
     int result = app.exec();
 
