@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>test.mp3</file>
-        <file>qml/main.qml</file>
         <file>qml/images/led_off2.png</file>
         <file>qml/images/led_on2.png</file>
         <file>qml/images/eqline.png</file>
