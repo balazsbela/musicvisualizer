@@ -8,13 +8,14 @@ VisualizationData::VisualizationData(Visualizer::Common::fft_result_queue_t& que
     , m_queue(queue)
     , m_model(model)
 {
-    m_timer.setInterval(0);
+    m_timer.setTimerType(Qt::PreciseTimer);
+    m_timer.setInterval(10);
     m_timer.setSingleShot(false);
 
     QObject::connect(&m_timer, &QTimer::timeout, [&]()
     {
         Visualizer::Common::fft_result result;
-        while (m_queue.pop(result))
+        if (m_queue.pop(result))
         {
             QVariantList list;
             for (int i = 0; i < Visualizer::Common::fftResultSize; ++i)

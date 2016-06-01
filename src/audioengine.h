@@ -45,8 +45,6 @@ private:
 
     Visualizer::Common::Event        m_fftEvent;
     QByteArray                       m_previousFFTBuffer;
-    unsigned                         m_previousSampleCount = 0;
-
 
     static const unsigned            s_toneBufferSize = 20 * 512;
 

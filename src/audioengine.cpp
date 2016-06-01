@@ -136,6 +136,7 @@ void AudioEngine::setup()
         }
     });
 
+    m_audioOutputTimer.setTimerType(Qt::PreciseTimer);
     m_audioOutputTimer.setInterval(15);
     m_audioOutputTimer.setSingleShot(false);
     QObject::connect(&m_audioOutputTimer, &QTimer::timeout, this, &AudioEngine::processQueue);
@@ -151,7 +152,8 @@ void AudioEngine::startToneGenerator()
 
     m_device = m_audioOutput->start();
 
-    m_toneTimer.setInterval(10);
+    m_toneTimer.setTimerType(Qt::PreciseTimer);
+    m_toneTimer.setInterval(15);
     QObject::connect(&m_toneTimer, &QTimer::timeout, [&]()
     {
         m_generator->readData(m_toneBuffer, s_toneBufferSize);
@@ -287,7 +289,7 @@ void AudioEngine::processQueue()
 
                     written = m_device->write(rawBuffer);
 
-                   // m_audioOutputTimer.setInterval(audioBuffer.duration() / 1000);
+                    m_audioOutputTimer.setInterval((audioBuffer.duration() / 1000));
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;
@@ -297,4 +299,5 @@ void AudioEngine::processQueue()
             }
         }
     }
+
 }
