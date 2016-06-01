@@ -8,8 +8,8 @@
 #include <QDebug>
 
 
-FFTWrapper::FFTWrapper(Visualizer::Constants::sample_queue_t& inQueue,
-                       Visualizer::Constants::fft_result_queue_t& outQueue,
+FFTWrapper::FFTWrapper(Visualizer::Common::sample_queue_t& inQueue,
+                       Visualizer::Common::fft_result_queue_t& outQueue,
                        QObject* parent)
     : QObject(parent)
     , m_inQueue(inQueue)
@@ -101,7 +101,7 @@ void FFTWrapper::calculateWindow()
 
 void FFTWrapper::pullBuffer()
 {
-    Visualizer::Constants::Event event;
+    Visualizer::Common::Event event;
     while (m_inQueue.pop(event))
     {
         // Our buffer can be bigger, in case we can have multiple
@@ -158,7 +158,7 @@ void FFTWrapper::calculate()
 {
     fftw_execute(m_plan);
 
-    Visualizer::Constants::fft_result spectrum;
+    Visualizer::Common::fft_result spectrum;
 
 //    qDebug() << "_________________________________________________";
 

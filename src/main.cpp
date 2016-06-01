@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
 
     // Set up communication through event queue
 
-    Visualizer::Constants::sample_queue_t bufferQueue(0);
-    Visualizer::Constants::fft_result_queue_t fftResultQueue(0);
+    Visualizer::Common::sample_queue_t bufferQueue(0);
+    Visualizer::Common::fft_result_queue_t fftResultQueue(0);
 
     // Start audio thread
 

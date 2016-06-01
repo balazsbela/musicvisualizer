@@ -7,7 +7,7 @@
 
 namespace Visualizer {
 
-namespace Constants
+namespace Common
 {
 
     const unsigned sampleRate = 44100;

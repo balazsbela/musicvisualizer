@@ -14,7 +14,7 @@ Q_OBJECT;
 
 public:
 
-    VisualizationData(Visualizer::Constants::fft_result_queue_t& queue,
+    VisualizationData(Visualizer::Common::fft_result_queue_t& queue,
                       QQmlVariantListModel& model,
                       QObject* parent = nullptr);
 
@@ -22,7 +22,7 @@ public:
 
 private:
 
-    Visualizer::Constants::fft_result_queue_t& m_queue;
+    Visualizer::Common::fft_result_queue_t& m_queue;
     QTimer m_timer;
 
     QQmlVariantListModel& m_model;

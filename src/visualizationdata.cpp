@@ -1,7 +1,7 @@
 #include "visualizationdata.h"
 
 
-VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& queue,
+VisualizationData::VisualizationData(Visualizer::Common::fft_result_queue_t& queue,
                                      QQmlVariantListModel& model,
                                      QObject* parent)
     : QObject(parent)
@@ -13,11 +13,11 @@ VisualizationData::VisualizationData(Visualizer::Constants::fft_result_queue_t& 
 
     QObject::connect(&m_timer, &QTimer::timeout, [&]()
     {
-        Visualizer::Constants::fft_result result;
+        Visualizer::Common::fft_result result;
         while (m_queue.pop(result))
         {
             QVariantList list;
-            for (int i = 0; i < Visualizer::Constants::fftResultSize; ++i)
+            for (int i = 0; i < Visualizer::Common::fftResultSize; ++i)
             {
                 QVariantMap element;
                 element["val"] = qreal(result[i]);

@@ -18,7 +18,7 @@ class AudioEngine : public QObject
 
 public:
 
-    explicit AudioEngine(Visualizer::Constants::sample_queue_t& eventQueue, QObject* parent = nullptr);
+    explicit AudioEngine(Visualizer::Common::sample_queue_t& eventQueue, QObject* parent = nullptr);
     ~AudioEngine();
 
     void setup();
@@ -43,7 +43,7 @@ private:
     bool pushEventIfBufferFull();
 
 
-    Visualizer::Constants::Event     m_fftEvent;
+    Visualizer::Common::Event        m_fftEvent;
     QByteArray                       m_previousFFTBuffer;
     unsigned                         m_previousSampleCount = 0;
 
@@ -65,5 +65,5 @@ private:
     QTimer                           m_toneTimer;
     char*                            m_toneBuffer = nullptr;
 
-    Visualizer::Constants::sample_queue_t&  m_eventQueue;
+    Visualizer::Common::sample_queue_t&  m_eventQueue;
 };

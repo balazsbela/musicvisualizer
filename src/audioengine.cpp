@@ -13,7 +13,7 @@
 #define debugFFTChunks QNoDebug()
 
 
-AudioEngine::AudioEngine(Visualizer::Constants::sample_queue_t& eventQueue, QObject* parent)
+AudioEngine::AudioEngine(Visualizer::Common::sample_queue_t& eventQueue, QObject* parent)
     : QObject(parent)
     , m_toneBuffer (new char[s_toneBufferSize])
     , m_eventQueue(eventQueue)
@@ -46,7 +46,7 @@ void AudioEngine::setup()
     m_format.setChannelCount(1);
     m_format.setCodec("audio/pcm");
     m_format.setSampleType(QAudioFormat::SignedInt);
-    m_format.setSampleRate(Visualizer::Constants::sampleRate);
+    m_format.setSampleRate(Visualizer::Common::sampleRate);
     m_format.setByteOrder(QAudioFormat::LittleEndian);
     m_format.setSampleSize(16);
 
@@ -213,14 +213,14 @@ void AudioEngine::sendToFFT(const QByteArray& buffer)
 
     debugFFTChunks << "Total size added to previous:" << totalAudioBuffer.sampleCount();
 
-    if (totalAudioBuffer.sampleCount() < Visualizer::Constants::fftBufferSize)
+    if (totalAudioBuffer.sampleCount() < Visualizer::Common::fftBufferSize)
     {
         debugFFTChunks << "Not enough, saving for next round!";
         return;
     }
 
-    unsigned nrChunks = totalAudioBuffer.sampleCount() / Visualizer::Constants::fftBufferSize;
-    unsigned lastIndex = Visualizer::Constants::fftBufferSize * nrChunks;
+    unsigned nrChunks = totalAudioBuffer.sampleCount() / Visualizer::Common::fftBufferSize;
+    unsigned lastIndex = Visualizer::Common::fftBufferSize * nrChunks;
 
     debugFFTChunks << "Nr chunks:" << nrChunks << " last index:" << lastIndex;
 
@@ -230,7 +230,7 @@ void AudioEngine::sendToFFT(const QByteArray& buffer)
     for(int i = 0; i < lastIndex; ++i)
     {
         m_fftEvent.data[m_fftEvent.nrElements++] = samples[i];
-        if (m_fftEvent.nrElements == Visualizer::Constants::fftBufferSize)
+        if (m_fftEvent.nrElements == Visualizer::Common::fftBufferSize)
         {
             debugFFTChunks << "Sending fft event";
 
@@ -239,7 +239,7 @@ void AudioEngine::sendToFFT(const QByteArray& buffer)
         }
     }
 
-    debugFFTChunks << "Removed from 0 to " << lastIndex << " remaining: " << totalAudioBuffer.sampleCount() % Visualizer::Constants::fftBufferSize;
+    debugFFTChunks << "Removed from 0 to " << lastIndex << " remaining: " << totalAudioBuffer.sampleCount() % Visualizer::Common::fftBufferSize;
 
     m_previousFFTBuffer =  m_previousFFTBuffer.remove(0, lastIndex * sizeof(qint16));
 }
@@ -254,7 +254,7 @@ void AudioEngine::processQueue()
         qint64 bytesRemaining = buffer.byteCount();
         qint64 totalBytesWritten = 0;
 
-        Visualizer::Constants::sample_t sample = 0.0f;
+        Visualizer::Common::sample_t sample = 0.0f;
         const QByteArray byteArray(static_cast<const char*>(buffer.constData()),  buffer.byteCount());
         QDataStream instream(byteArray);
         instream.setFloatingPointPrecision(QDataStream::SinglePrecision);
