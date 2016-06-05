@@ -1,5 +1,5 @@
 #include "visualizationdata.h"
-
+#include "constants.h"
 
 VisualizationData::VisualizationData(Visualizer::Common::fft_result_queue_t& queue,
                                      QQmlVariantListModel& model,
@@ -9,7 +9,7 @@ VisualizationData::VisualizationData(Visualizer::Common::fft_result_queue_t& que
     , m_model(model)
 {
     m_timer.setTimerType(Qt::PreciseTimer);
-    m_timer.setInterval(15);
+    m_timer.setInterval(Visualizer::Common::fftTimerInterval);
     m_timer.setSingleShot(false);
 
     QObject::connect(&m_timer, &QTimer::timeout, [&]()

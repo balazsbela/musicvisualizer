@@ -136,7 +136,7 @@ void AudioEngine::setup()
     });
 
     m_audioOutputTimer.setTimerType(Qt::PreciseTimer);
-    m_audioOutputTimer.setInterval(15);
+    m_audioOutputTimer.setInterval(Visualizer::Common::audioTimerInterval);
     m_audioOutputTimer.setSingleShot(false);
     QObject::connect(&m_audioOutputTimer, &QTimer::timeout, this, &AudioEngine::processQueue);
 }
@@ -298,8 +298,6 @@ void AudioEngine::processQueue()
                     sendToFFT(rawBuffer);
 
                     written = m_device->write(rawBuffer);
-
-                    m_audioOutputTimer.setInterval((audioBuffer.duration() / 1000));
 
                     bytesRemaining -= written;
                     totalBytesWritten += written;

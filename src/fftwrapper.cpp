@@ -46,7 +46,7 @@ void FFTWrapper::start()
     m_plan = fftw_plan_dft_1d(s_fftInputSize, m_in, m_out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     m_pullTimer.setTimerType(Qt::PreciseTimer);
-    m_pullTimer.setInterval(15);
+    m_pullTimer.setInterval(Visualizer::Common::fftTimerInterval);
     m_pullTimer.setSingleShot(false);
     QObject::connect(&m_pullTimer, &QTimer::timeout, this, &FFTWrapper::pullBuffer);
 

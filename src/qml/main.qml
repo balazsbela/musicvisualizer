@@ -16,6 +16,8 @@ Window
         height: parent.height / 2
 
         property variant previousdata : []
+        property variant previousDataAge: []
+
         property bool interpolate : true
         property real t : 0.0
 
@@ -81,9 +83,14 @@ Window
                         var previous = root.previousdata[i] ? root.previousdata[i] : 0;
                         current = (1 - t) * item.val + t * previous;
 
-                        if (Math.abs(item.val - previous) > 0.1)
+                        if (Math.abs(item.val - previous) > 0.1 || root.previousDataAge[i] > 10)
                         {
                             root.previousdata[i] = item.val;
+                            root.previousDataAge[i] = 0;
+                        }
+                        else
+                        {
+                            root.previousDataAge[i]++;
                         }
                     }
                     else
@@ -142,8 +149,8 @@ Window
                 void main() {
                     vec4 current = texture2D(source, qt_TexCoord0) * 1.75;
                     vec4 previous = texture2D(recursiveSource, qt_TexCoord0);
-                    gl_FragColor = qt_Opacity * mix(current, previous, 0.98);
-                    //gl_FragColor = qt_Opacity * current;
+                    //gl_FragColor = qt_Opacity * mix(current, previous, 0.98);
+                    gl_FragColor = qt_Opacity * current;
                 }"
         }
 

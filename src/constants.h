@@ -9,6 +9,9 @@ namespace Visualizer {
 
 namespace Common
 {
+    // They need to be more or less the same, otherwise the picture lags to the audio
+    const unsigned fftTimerInterval = 20;
+    const unsigned audioTimerInterval = 20;
 
     const unsigned sampleRate = 44100;
     const unsigned fftNrSamples = 1024;
