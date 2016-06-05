@@ -124,18 +124,18 @@ Window
                 UniformAnimator {
                     uniform: "interpolationFactor"
                     target: shaderItem
-                    from: 0.75
-                    to: 1.0
-                    duration: 10000
+                    from: 0.85
+                    to: 0.99
+                    duration: 1000
                     easing.type: Easing.Linear
                 }
 
                 UniformAnimator {
                     uniform: "interpolationFactor"
                     target: shaderItem
-                    from: 1.0
-                    to: 0.75
-                    duration: 10000
+                    from: 0.99
+                    to: 0.85
+                    duration: 1000
                     easing.type: Easing.Linear
                 }
             }
@@ -149,8 +149,8 @@ Window
                 void main() {
                     vec4 current = texture2D(source, qt_TexCoord0) * 1.75;
                     vec4 previous = texture2D(recursiveSource, qt_TexCoord0);
-                    //gl_FragColor = qt_Opacity * mix(current, previous, 0.98);
-                    gl_FragColor = qt_Opacity * current;
+                    gl_FragColor = qt_Opacity * mix(current, previous, interpolationFactor);
+                    //gl_FragColor = qt_Opacity * current;
                 }"
         }
 
