@@ -38,7 +38,20 @@ int main(int argc, char *argv[])
     AudioEngine audioEngine(bufferQueue);
     audioEngine.moveToThread(&audioThread);
 //    QObject::connect(&audioThread, &QThread::started, &audioEngine, &AudioEngine::startToneGenerator);
-    QObject::connect(&audioThread, &QThread::started, &audioEngine, &AudioEngine::startPlayback);
+
+    QObject::connect(&audioThread, &QThread::started, &audioEngine, [&]()
+    {
+        const auto& args = QGuiApplication::arguments();
+        if (args.count() > 1)
+        {
+            audioEngine.startPlayback(args[1]);
+        }
+        else
+        {
+            audioEngine.startPlayback();
+        }
+    });
+
     audioThread.start();
 
     // Start FFT Thread
@@ -74,6 +87,8 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.addImportPath(":/qml/");
     engine.rootContext()->setContextProperty(QStringLiteral("dataModel"), &model);
+    //engine.load(QUrl(QStringLiteral("qrc:/qml/videosynth.qml")));
+
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 
     int result = app.exec();

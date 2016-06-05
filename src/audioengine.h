@@ -25,7 +25,7 @@ public:
 
 public slots:
 
-    void startPlayback();
+    void startPlayback(const QString& filePath = {});
     void startToneGenerator();
     void stop();
 

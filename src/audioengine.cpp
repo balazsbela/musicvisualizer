@@ -181,20 +181,29 @@ void AudioEngine::stop()
 }
 
 
-void AudioEngine::startPlayback()
+void AudioEngine::startPlayback(const QString& filePath)
 {
     setup();
 
     m_audioOutput->stop();
 
-    // TODO: Fix this, for some reason we can't set the resource file directly in the
-    // decoder, so we copy the file from the resources into the current directory
+    if (filePath.isEmpty())
+    {
+        // TODO: Fix this, for some reason we can't set the resource file directly in the
+        // decoder, so we copy the file from the resources into the current directory
 
-    QFile file(":/test.mp3");
-//    QFile file(":/440hz.wav");
-    file.copy("test.mp3");
+        QFile file(":/test.mp3");
+     // QFile file(":/440hz.wav");
+        file.copy("test.mp3");
 
-    m_decoder.setSourceFilename(QDir::currentPath() +"/test.mp3");
+        m_decoder.setSourceFilename(QDir::currentPath() +"/test.mp3");
+    }
+    else
+    {
+        m_decoder.setSourceFilename(filePath);
+    }
+
+
     m_device = m_audioOutput->start();
     m_decoder.start();
 

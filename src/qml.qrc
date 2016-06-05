@@ -7,5 +7,6 @@
         <file>qml/LedScreen.qml</file>
         <file>440hz.wav</file>
         <file>qml/main.qml</file>
+        <file>qml/videosynth.qml</file>
     </qresource>
 </RCC>

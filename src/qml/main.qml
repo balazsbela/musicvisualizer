@@ -5,8 +5,6 @@ Window
 {
     visible: true
     id: mainwindow
-    width:1024
-    height:768
     color: "#000000"
     visibility: "FullScreen"
 
@@ -17,39 +15,35 @@ Window
         width: parent.width
         height: parent.height / 2
 
-
-        property int framesSinceModelReset: 0
-        property int maxFramesSinceModelReset: 0
         property variant previousdata : []
-        property bool interpolate : false
-
+        property bool interpolate : true
+        property real t : 0.0
 
         Connections
         {
             target: dataModel
             onModelReset:
             {
-                root.maxFramesSinceModelReset = root.framesSinceModelReset >
-                                                root.maxFramesSinceModelReset ? root.framesSinceModelReset
-                                                                              : root.maxFramesSinceModelReset
-                if (root.maxFramesSinceModelReset > 4)
+                if (root.interpolate)
                 {
-                    root.maxFramesSinceModelReset = 4;
+                    root.t = 0.0;
                 }
-
-                root.framesSinceModelReset = 0;
             }
-
         }
 
         Timer
         {
             running: true
-            interval: 10
+            interval: 15
             repeat: true
             onTriggered:
             {
-                canvas.requestPaint();
+                if (root.interpolate)
+                {
+                   root.t = root.t >= 1.00 ?  1.00 : root.t + 0.15;
+                }
+
+               canvas.requestPaint();
             }
         }
 
@@ -64,33 +58,44 @@ Window
             {
                 var ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, width, height);
-                ctx.lineWidth = 5;
+                ctx.lineWidth = 3;
                 ctx.globalAlpha = 1.0;
+
+                var t = root.t;
 
                 for (var i = 0; i < dataModel.count; ++i)
                 {
+                    var x = i * 4;
+                    if (x > mainwindow.width)
+                    {
+                        return;
+                    }
+
                     var item = dataModel.get(i);
                     ctx.strokeStyle = Qt.hsla(i / dataModel.count, 0.85, 0.45, 1.0);
 
-                    var previous = root.previousdata[i] ? root.previousdata[i] : 0;
+                    var current = 0;
 
-                    var t = root.framesSinceModelReset.toFixed(2) / root.maxFramesSinceModelReset.toFixed(2);
-                    var current = root.interpolate ? (1 - t) * item.val + t * previous : item.val;
+                    if (root.interpolate)
+                    {
+                        var previous = root.previousdata[i] ? root.previousdata[i] : 0;
+                        current = (1 - t) * item.val + t * previous;
 
-//                    console.log(root.framesSinceModelReset.toFixed(2) + " " + root.maxFramesSinceModelReset.toFixed(2) + " " + t);
+                        if (Math.abs(item.val - previous) > 0.1)
+                        {
+                            root.previousdata[i] = item.val;
+                        }
+                    }
+                    else
+                    {
+                        current = item.val;
+                    }
 
-                    var x = i * 6;
                     ctx.beginPath();
                     ctx.moveTo(x, parent.height);
                     ctx.lineTo(x, parent.height - 300 * current);
                     ctx.stroke();
-
-                    var delta = Math.abs(previous - item.val);
-                    //console.log(t + " prev " + previous + " current "+ item.val + " result " + current + " delta " + delta);
-
-                    root.previousdata[i] = item.val;
                 }
-                root.framesSinceModelReset++;
             }
 
         }
@@ -137,8 +142,8 @@ Window
                 void main() {
                     vec4 current = texture2D(source, qt_TexCoord0) * 1.75;
                     vec4 previous = texture2D(recursiveSource, qt_TexCoord0);
-                    //gl_FragColor = qt_Opacity * mix(current, previous, 0.96);
-                    gl_FragColor = qt_Opacity * current;
+                    gl_FragColor = qt_Opacity * mix(current, previous, 0.98);
+                    //gl_FragColor = qt_Opacity * current;
                 }"
         }
 

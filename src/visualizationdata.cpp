@@ -9,7 +9,7 @@ VisualizationData::VisualizationData(Visualizer::Common::fft_result_queue_t& que
     , m_model(model)
 {
     m_timer.setTimerType(Qt::PreciseTimer);
-    m_timer.setInterval(10);
+    m_timer.setInterval(15);
     m_timer.setSingleShot(false);
 
     QObject::connect(&m_timer, &QTimer::timeout, [&]()
@@ -22,7 +22,6 @@ VisualizationData::VisualizationData(Visualizer::Common::fft_result_queue_t& que
             {
                 QVariantMap element;
                 element["val"] = qreal(result[i]);
-
                 list.append(element);
             }
 
