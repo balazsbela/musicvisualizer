@@ -126,7 +126,7 @@ Window
                     target: shaderItem
                     from: 0.85
                     to: 0.99
-                    duration: 1000
+                    duration: 100
                     easing.type: Easing.Linear
                 }
 
@@ -135,7 +135,7 @@ Window
                     target: shaderItem
                     from: 0.99
                     to: 0.85
-                    duration: 1000
+                    duration: 100
                     easing.type: Easing.Linear
                 }
             }
