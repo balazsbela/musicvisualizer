@@ -1,13 +1,14 @@
-#include "visualizationdata.h"
+#include "fftvisualizationdata.h"
 #include "constants.h"
 
-VisualizationData::VisualizationData(Visualizer::Common::fft_result_queue_t& queue,
-                                     QQmlVariantListModel& model,
-                                     QObject* parent)
+FFTVisualizationData::FFTVisualizationData(Visualizer::Common::fft_result_queue_t& queue,
+                                           QObject* parent)
     : QObject(parent)
     , m_queue(queue)
-    , m_model(model)
 {
+    m_model.setParent(this);
+    m_timer.setParent(this);
+
     m_timer.setTimerType(Qt::PreciseTimer);
     m_timer.setInterval(Visualizer::Common::fftTimerInterval);
     m_timer.setSingleShot(false);

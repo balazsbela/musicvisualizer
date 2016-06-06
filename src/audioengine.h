@@ -18,7 +18,9 @@ class AudioEngine : public QObject
 
 public:
 
-    explicit AudioEngine(Visualizer::Common::sample_queue_t& eventQueue, QObject* parent = nullptr);
+    explicit AudioEngine(Visualizer::Common::fft_queue_t& eventQueue,
+                         Visualizer::Common::sample_queue_t& sampleEventQueue,
+                         QObject* parent = nullptr);
     ~AudioEngine();
 
     void setup();
@@ -39,13 +41,14 @@ private slots:
 
 private:
 
-    void sendToFFT(const QByteArray& buffer);
-    bool pushEventIfBufferFull();
+    void sendEvents(const QByteArray& buffer);
 
-
-    Visualizer::Common::Event        m_fftEvent;
-    QByteArray                       m_previousFFTBuffer;
-    unsigned                         m_fftBufferIndex = 0;
+    template<class DestinationQueue, class DestinationEvent>
+    void dispatchInChunks(const QByteArray& buffer,
+                          unsigned chunkSize,
+                          QByteArray& partialBuffer,
+                          DestinationEvent& event,
+                          DestinationQueue& queue);
 
     static const unsigned            s_toneBufferSize = 20 * 512;
 
@@ -64,5 +67,13 @@ private:
     QTimer                           m_toneTimer;
     char*                            m_toneBuffer = nullptr;
 
-    Visualizer::Common::sample_queue_t&  m_eventQueue;
+    Visualizer::Common::fft_queue_t&        m_fftEventQueue;
+    Visualizer::Common::FFTEvent            m_fftEvent;
+    QByteArray                              m_partialFFTBuffer;
+
+
+    Visualizer::Common::sample_queue_t&     m_sampleEventQueue;
+    Visualizer::Common::SampleEvent         m_sampleEvent;
+    QByteArray                              m_partialSampleBuffer;
+
 };

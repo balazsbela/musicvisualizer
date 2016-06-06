@@ -8,5 +8,6 @@
         <file>440hz.wav</file>
         <file>qml/main.qml</file>
         <file>qml/videosynth.qml</file>
+        <file>qml/spectogram.qml</file>
     </qresource>
 </RCC>

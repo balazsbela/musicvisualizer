@@ -8,7 +8,7 @@
 #include <QDebug>
 
 
-FFTWrapper::FFTWrapper(Visualizer::Common::sample_queue_t& inQueue,
+FFTWrapper::FFTWrapper(Visualizer::Common::fft_queue_t& inQueue,
                        Visualizer::Common::fft_result_queue_t& outQueue,
                        QObject* parent)
     : QObject(parent)
@@ -61,26 +61,6 @@ void FFTWrapper::stop()
 }
 
 
-double sampleToFloat(qint16 value)
-{
-    const qint16 PCMS16MaxValue     =  32767;
-    const double PCMS16MaxAmplitude =  32768.0; // because minimum is -32768
-
-    double f = double(value) / PCMS16MaxAmplitude;
-
-    if (f > 1.0) f = 1.0;
-    if (f < -1.0) f = -1.0;
-
-    return f;
-}
-
-
-float sampleToFloat(float value)
-{
-    return value;
-}
-
-
 void FFTWrapper::calculateWindow()
 {
     for (int i = 0; i < s_fftInputSize; ++i)
@@ -101,7 +81,7 @@ void FFTWrapper::calculateWindow()
 
 void FFTWrapper::pullBuffer()
 {
-    Visualizer::Common::Event event;
+    Visualizer::Common::FFTEvent event;
     if (m_inQueue.pop(event))
     {
         // Our buffer can be bigger, in case we can have multiple
@@ -116,7 +96,7 @@ void FFTWrapper::pullBuffer()
         {
             for (int i = 0; i < event.nrElements; i += nrSections)
             {
-                m_in[j][0] = sampleToFloat(event.data[i]) * m_window[j];
+                m_in[j][0] = Visualizer::Common::sampleToFloat(event.data[i]) * m_window[j];
                 m_in[j][1] = 0;
 
                 if (++j >= s_fftInputSize)
@@ -134,8 +114,8 @@ void FFTWrapper::pullBuffer()
                 // If we jumped an uneven number of samples, we need to mind the channel count
 
                 // Real part
-                m_in[j][0] = isEven || i == 0 ? (sampleToFloat(event.data[i]) + sampleToFloat(event.data[i + 1])) / 2.0f
-                                              : (sampleToFloat(event.data[i - 1]) + sampleToFloat(event.data[i])) / 2.0f;
+                m_in[j][0] = isEven || i == 0 ? (Visualizer::Common::sampleToFloat(event.data[i]) + Visualizer::Common::sampleToFloat(event.data[i + 1])) / 2.0f
+                                              : (Visualizer::Common::sampleToFloat(event.data[i - 1]) + Visualizer::Common::sampleToFloat(event.data[i])) / 2.0f;
 
                 // Imaginary part
                 m_in[j][1] = 0.0;

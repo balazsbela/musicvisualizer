@@ -10,13 +10,16 @@
 #include <QDebug>
 
 
-#define debugFFTChunks QNoDebug()
+#define debugChunks QNoDebug()
 
 
-AudioEngine::AudioEngine(Visualizer::Common::sample_queue_t& eventQueue, QObject* parent)
+AudioEngine::AudioEngine(Visualizer::Common::fft_queue_t& eventQueue,
+                         Visualizer::Common::sample_queue_t& sampleEventQueue,
+                         QObject* parent)
     : QObject(parent)
     , m_toneBuffer (new char[s_toneBufferSize])
-    , m_eventQueue(eventQueue)
+    , m_fftEventQueue(eventQueue)
+    , m_sampleEventQueue(sampleEventQueue)
 {
     m_toneTimer.setParent(this);
     m_fileWriter.setParent(this);
@@ -68,7 +71,7 @@ void AudioEngine::setup()
     }
 
     m_audioOutput = new QAudioOutput(m_format, this);
-    m_audioOutput->setVolume(0.5);
+    m_audioOutput->setVolume(1.0);
 
     QObject::connect(m_audioOutput, &QAudioOutput::stateChanged, [this](QAudio::State newState)
     {
@@ -209,50 +212,65 @@ void AudioEngine::startPlayback(const QString& filePath)
 
 }
 
-
-void AudioEngine::sendToFFT(const QByteArray& buffer)
+template<class DestinationQueue, class DestinationEvent>
+void AudioEngine::dispatchInChunks(const QByteArray& buffer,
+                                   unsigned chunkSize,
+                                   QByteArray& partialBuffer,
+                                   DestinationEvent& event,
+                                   DestinationQueue& queue)
 {
-    QAudioBuffer current(buffer, m_format);
+    debugChunks << "____________dispatchInChunks________________________";
+    debugChunks << "Current buffer size:" << QAudioBuffer(buffer, m_format).sampleCount();
 
-    debugFFTChunks << "____________sendToFFT________________________";
-    debugFFTChunks << "Current buffer size:" << current.sampleCount();
+    partialBuffer.append(buffer);
 
-    m_previousFFTBuffer.append(buffer);
-    QAudioBuffer totalAudioBuffer(m_previousFFTBuffer, m_format);
+    QAudioBuffer totalAudioBuffer(partialBuffer, m_format);
 
-    debugFFTChunks << "Total size added to previous:" << totalAudioBuffer.sampleCount();
+    debugChunks << "Total size added to previous:" << totalAudioBuffer.sampleCount();
 
-    if (totalAudioBuffer.sampleCount() < Visualizer::Common::fftBufferSize)
+    if (totalAudioBuffer.sampleCount() < chunkSize)
     {
-        debugFFTChunks << "Not enough, saving for next round!";
+        debugChunks << "Not enough, saving for next round!";
         return;
     }
 
-    unsigned nrChunks = totalAudioBuffer.sampleCount() / Visualizer::Common::fftBufferSize;
-    unsigned lastIndex = Visualizer::Common::fftBufferSize * nrChunks;
+    unsigned nrChunks = totalAudioBuffer.sampleCount() / chunkSize;
+    unsigned lastIndex = chunkSize * nrChunks;
 
-    debugFFTChunks << "Nr chunks:" << nrChunks << " last index:" << lastIndex;
+    debugChunks << "Nr chunks:" << nrChunks << " last index:" << lastIndex;
 
-    m_fftEvent.nrChannels = m_format.channelCount();
-    const qint16 *samples = totalAudioBuffer.constData<qint16>();
+    event.nrChannels = m_format.channelCount();
+    const Visualizer::Common::sample_t *samples = totalAudioBuffer.constData<Visualizer::Common::sample_t>();
 
     for(int i = 0; i < lastIndex; ++i)
     {
-        m_fftEvent.data[m_fftEvent.nrElements++] = samples[i];
-        if (m_fftEvent.nrElements == Visualizer::Common::fftBufferSize)
+        event.data[event.nrElements++] = samples[i];
+        if (event.nrElements == chunkSize)
         {
-            debugFFTChunks << "Sending fft event";
+            debugChunks << "Sending event";
 
-            m_eventQueue.push(m_fftEvent);
-            m_fftEvent.nrElements = 0;
-
-            m_fftBufferIndex = (m_fftBufferIndex + 1) % 10;
+            queue.push(event);
+            event.nrElements = 0;
         }
     }
 
-    debugFFTChunks << "Removed from 0 to " << lastIndex << " remaining: " << totalAudioBuffer.sampleCount() % Visualizer::Common::fftBufferSize;
+    debugChunks << "Removed from 0 to " << lastIndex << " remaining: " << totalAudioBuffer.sampleCount() % chunkSize;
 
-    m_previousFFTBuffer =  m_previousFFTBuffer.remove(0, lastIndex * sizeof(qint16));
+    partialBuffer =  partialBuffer.remove(0, lastIndex * sizeof(Visualizer::Common::sample_t));
+
+}
+
+
+void AudioEngine::sendEvents(const QByteArray& buffer)
+{
+    dispatchInChunks<Visualizer::Common::fft_queue_t,
+                     Visualizer::Common::FFTEvent>(buffer, Visualizer::Common::fftNrSamples,
+                                                   m_partialFFTBuffer, m_fftEvent, m_fftEventQueue);
+
+
+    dispatchInChunks<Visualizer::Common::sample_queue_t,
+                     Visualizer::Common::SampleEvent>(buffer, Visualizer::Common::nrSamples,
+                                                      m_partialSampleBuffer, m_sampleEvent, m_sampleEventQueue);
 }
 
 
@@ -295,7 +313,7 @@ void AudioEngine::processQueue()
                     QAudioBuffer audioBuffer(rawBuffer, m_format);
                     audioBuffer.duration();
 
-                    sendToFFT(rawBuffer);
+                    sendEvents(rawBuffer);
 
                     written = m_device->write(rawBuffer);
 

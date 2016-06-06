@@ -9,7 +9,8 @@
 #include "constants.h"
 #include "audioengine.h"
 #include "fftwrapper.h"
-#include "visualizationdata.h"
+#include "fftvisualizationdata.h"
+#include "samplevisualizationdata.h"
 
 
 int main(int argc, char *argv[])
@@ -29,17 +30,19 @@ int main(int argc, char *argv[])
 
     // Set up communication through event queue
 
-    Visualizer::Common::sample_queue_t bufferQueue(0);
+    Visualizer::Common::fft_queue_t bufferQueue(0);
     Visualizer::Common::fft_result_queue_t fftResultQueue(0);
+    Visualizer::Common::sample_queue_t sampleQueue(0);
+
 
     // Start audio thread
 
     QThread audioThread;
-    AudioEngine audioEngine(bufferQueue);
+    AudioEngine audioEngine(bufferQueue, sampleQueue);
     audioEngine.moveToThread(&audioThread);
     QObject::connect(&audioThread, &QThread::started, &audioEngine, [&]()
     {
-     //   audioEngine.startToneGenerator();
+        //audioEngine.startToneGenerator();
 
         const auto& args = QGuiApplication::arguments();
         if (args.count() > 1)
@@ -79,14 +82,16 @@ int main(int argc, char *argv[])
     });
 
 
-    QQmlVariantListModel model;
-    VisualizationData visualization(fftResultQueue, model);
+    FFTVisualizationData fftVisualization(fftResultQueue);
+    SampleVisualizationData sampleVisualization(sampleQueue);
 
     qmlRegisterType<QQmlVariantListModel>("visualizer.models", 1, 0, "QQmlVariantListModel");
 
     QQmlApplicationEngine engine;
     engine.addImportPath(":/qml/");
-    engine.rootContext()->setContextProperty(QStringLiteral("dataModel"), &model);
+    engine.rootContext()->setContextProperty(QStringLiteral("fftData"), fftVisualization.getModel());
+    engine.rootContext()->setContextProperty(QStringLiteral("sampleData"), sampleVisualization.getModel());
+
     //engine.load(QUrl(QStringLiteral("qrc:/qml/videosynth.qml")));
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
