@@ -52,7 +52,7 @@ Rectangle
             loops: 1
             from: 0
             to: bufferSize
-            duration: 16
+            duration: 60
         }
 
         ParallelAnimation
@@ -70,29 +70,29 @@ Rectangle
             }
         }
 
-        ParallelAnimation
-        {
-            running: true
-            loops: Animation.Infinite
+//        ParallelAnimation
+//        {
+//            running: true
+//            loops: Animation.Infinite
 
-            UniformAnimator {
-                uniform: "freq"
-                target: shader
-                from: 0.05
-                to: 0.99
-                duration: 100000
-                easing.type: Easing.Linear
-            }
+//            UniformAnimator {
+//                uniform: "freq"
+//                target: shader
+//                from: 0.05
+//                to: 0.99
+//                duration: 100000
+//                easing.type: Easing.Linear
+//            }
 
-            UniformAnimator {
-                uniform: "freq"
-                target: shader
-                from: 0.99
-                to: 0.05
-                duration: 100000
-                easing.type: Easing.Linear
-            }
-        }
+//            UniformAnimator {
+//                uniform: "freq"
+//                target: shader
+//                from: 0.99
+//                to: 0.05
+//                duration: 100000
+//                easing.type: Easing.Linear
+//            }
+//        }
 
         anchors.fill: parent
         visible:true
@@ -141,7 +141,7 @@ Rectangle
 
     Timer
     {
-        interval: 16
+        interval: 60
         running: true
         repeat: true
         onTriggered:
