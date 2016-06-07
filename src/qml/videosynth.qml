@@ -60,7 +60,7 @@ Rectangle
             loops: 1
             from: 0
             to: bufferSize
-            duration: 60
+            duration: 16
         }
 
         ParallelAnimation
@@ -108,7 +108,7 @@ Rectangle
                               highp float timebase = (floor(lines * uv.y) + uv.x)/lines;
                               highp float osc1 = 0.5 + 0.5 * sin(6.283185 * (0.02 * time + 1.0 * timebase + modulationValue * 1.0 * length(feedback.rgb)));
                               highp float osc2 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 2.0 * lines * timebase + 0.9 * osc1));
-                              highp float osc3 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 2.999 * lines * timebase + 0.9 * osc2));
+                              highp float osc3 = 0.5 + 0.5 * sin(6.283185 * (0.1 * time + 2.999 * lines * timebase + 0.9 * osc2));
                               gl_FragColor = mix(1.75 * vec4(modulationAbsoluteValue * osc3 , modulationAbsoluteValue * osc1, modulationAbsoluteValue * osc2, 0.9), feedback, 0.7);
                           }"
     }
@@ -126,7 +126,7 @@ Rectangle
 
     Timer
     {
-        interval: 60
+        interval: 16
         running: true
         repeat: true
         onTriggered:

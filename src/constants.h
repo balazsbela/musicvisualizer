@@ -37,7 +37,7 @@ namespace Common
 
     // Sample queue, exposes audio data to other threads
 
-    const unsigned nrSamples = 1000;
+    const unsigned nrSamples = sampleRate * 0.16;
     using sample_array = std::array<sample_t, nrSamples>;
 
     struct SampleEvent
