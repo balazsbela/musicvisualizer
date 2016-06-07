@@ -6,6 +6,8 @@ import QtQuick.Window 2.2
  * Use the audio data to modulate the parameters of a video synth.
  *
  * Based on Julian Parker's Videosynth shader.
+ * julian dot parker at cantab dot net
+ * 2016
  *
  */
 
