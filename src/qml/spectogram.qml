@@ -54,7 +54,7 @@ Rectangle
             id: canvas
             anchors.fill: parent
             renderTarget: Canvas.FramebufferObject
-            renderStrategy: Canvas.Cooperative
+            renderStrategy: Canvas.Threaded
             antialiasing: true
             onPaint:
             {
