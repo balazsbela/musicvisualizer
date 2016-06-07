@@ -1,6 +1,15 @@
 import QtQuick 2.3
 import QtQuick.Window 2.2
 
+/* VideoSynth Synth
+ *
+ * Use the audio data to modulate the parameters of a video synth.
+ *
+ * Based on Julian Parker's Videosynth shader.
+ *
+ */
+
+
 Rectangle
 {
     id:root
@@ -8,6 +17,7 @@ Rectangle
     anchors.fill: parent
 
     property variant currentBuffer : []
+    property variant newBuffer : []
     property int bufferSize: 0
 
     Connections
@@ -19,8 +29,7 @@ Rectangle
           for (var i = 0; i < sampleData.count; ++i)
           {
             var item = sampleData.get(i);
-            currentBuffer[i] = item.val;
-
+            newBuffer[i] = item.val;
           }
         }
     }
@@ -33,8 +42,7 @@ Rectangle
         property variant prevSource: shaderOutput
         property variant feedbackGain:    0.3
         property real freq : 0.5
-        property real time
-
+        property real time : 0
 
         property real currentValue
         property int bufferIndex
@@ -70,30 +78,6 @@ Rectangle
             }
         }
 
-//        ParallelAnimation
-//        {
-//            running: true
-//            loops: Animation.Infinite
-
-//            UniformAnimator {
-//                uniform: "freq"
-//                target: shader
-//                from: 0.05
-//                to: 0.99
-//                duration: 100000
-//                easing.type: Easing.Linear
-//            }
-
-//            UniformAnimator {
-//                uniform: "freq"
-//                target: shader
-//                from: 0.99
-//                to: 0.05
-//                duration: 100000
-//                easing.type: Easing.Linear
-//            }
-//        }
-
         anchors.fill: parent
         visible:true
         blending:true
@@ -103,7 +87,7 @@ Rectangle
         property real frameHeight: parent.height
         antialiasing: true
         fragmentShader: "
-                          #define lines 1000.0
+                          #define lines 500.0
 
                           varying highp vec2 qt_TexCoord0;
                           uniform highp float time;
@@ -118,13 +102,14 @@ Rectangle
                           void main()
                           {
                               highp float modulationValue = currentValue + 0.5;
+                              highp float modulationAbsoluteValue = abs(currentValue) + 0.5;
                               highp vec2 uv = qt_TexCoord0;
                               highp vec4 feedback = texture2D(prevSource, 0.999 * uv - vec2(0.0,0.004));
                               highp float timebase = (floor(lines * uv.y) + uv.x)/lines;
-                              highp float osc1 = 0.5 + 0.5 * sin(6.283185 * (0.1 * time + 1.0 * timebase + modulationValue * 1.0 * length(feedback.rgb)));
-                              highp float osc2 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 4.0 * lines * timebase + 0.9 * modulationValue * osc1));
-                              highp float osc3 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 2.999 * lines * timebase + 0.9 * modulationValue * osc2));
-                              gl_FragColor = mix(vec4(modulationValue * osc3 , modulationValue * osc1, modulationValue * osc2, 0.9), feedback, 0.54);
+                              highp float osc1 = 0.5 + 0.5 * sin(6.283185 * (0.02 * time + 1.0 * timebase + modulationValue * 1.0 * length(feedback.rgb)));
+                              highp float osc2 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 2.0 * lines * timebase + 0.9 * osc1));
+                              highp float osc3 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 2.999 * lines * timebase + 0.9 * osc2));
+                              gl_FragColor = mix(1.75 * vec4(modulationAbsoluteValue * osc3 , modulationAbsoluteValue * osc1, modulationAbsoluteValue * osc2, 0.9), feedback, 0.7);
                           }"
     }
 
@@ -146,10 +131,10 @@ Rectangle
         repeat: true
         onTriggered:
         {
+            currentBuffer = newBuffer;
             counterAnimation.start()
             shaderOutput.scheduleUpdate()
         }
-
     }
 
 }
