@@ -11,7 +11,7 @@ class BufferTextureProvider : public QQuickImageProvider
 public:
 
     explicit BufferTextureProvider();
-    virtual ~BufferTextureProvider();
+    virtual ~BufferTextureProvider() = default;
 
     QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
 

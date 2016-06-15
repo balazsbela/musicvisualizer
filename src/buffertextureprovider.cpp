@@ -11,12 +11,6 @@ BufferTextureProvider::BufferTextureProvider()
 }
 
 
-BufferTextureProvider::~BufferTextureProvider()
-{
-    qDebug() << "Deleted!";
-}
-
-
 QImage BufferTextureProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
     *size = m_image.size();
