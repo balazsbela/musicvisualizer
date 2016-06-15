@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     FFTVisualizationData fftVisualization(fftResultQueue);
 
     // This must be a pointer, since the QML Engine takes ownership of it
-    // It will be freed by the QML Engine, if it's not a pointer, it will be double free-d.
+    // It will be freed by the QML Engine, if it's not a pointer, it will be double freed.
 
     BufferTextureProvider* bufferTextureProvider = new BufferTextureProvider();
     SampleVisualizationData sampleVisualization(sampleQueue, *bufferTextureProvider);
