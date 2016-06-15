@@ -195,9 +195,9 @@ void AudioEngine::startPlayback(const QString& filePath)
         // TODO: Fix this, for some reason we can't set the resource file directly in the
         // decoder, so we copy the file from the resources into the current directory
 
-        QFile file(":/test.mp3");
-     // QFile file(":/440hz.wav");
-        file.copy("test.mp3");
+      QFile file(":/test.mp3");
+//      QFile file(":/440hz.wav");
+      file.copy("test.mp3");
 
         m_decoder.setSourceFilename(QDir::currentPath() +"/test.mp3");
     }

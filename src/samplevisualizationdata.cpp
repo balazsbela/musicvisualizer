@@ -67,78 +67,9 @@ SampleVisualizationData::SampleVisualizationData(Visualizer::Common::sample_queu
 
                 // The image is stored using a 32-bit ARGB format (0xAARRGGBB).
 
-                qreal normalizedVal = (value + 1.0) / 2.0;
-                float floatval = normalizedVal;
-
+                qreal normalizedVal = (value + 1.0) / 2.0; // normalize to [0, 1) range
                 float floats[4];
-                pack(floatval, floats);
-
-//                qDebug() << "____________________";
-//                qDebug() << normalizedVal << value << (normalizedVal * 2.0) - 1.0;
-//                qDebug() << floats[0] << floats[1] << floats[2] << floats[3];
-
-//                unsigned red = floats[0] * 255.0f;
-//                unsigned green = floats[1] * 255.0f;
-//                unsigned blue = floats[2] * 255.0f;
-//                unsigned alpha = floats[3] * 255.0f;
-
-//                qDebug() << red << green << blue << alpha;
-
-//                float fred = red / 255.0f;
-//                float fgreen = green / 255.0f;
-//                float fblue = blue / 255.0f;
-//                float falpha = alpha / 255.0f;
-
-//                float testfloats[4];
-
-//                testfloats[0] = fred;
-//                testfloats[1] = fgreen;
-//                testfloats[2] = fblue;
-//                testfloats[3] = falpha;
-
-//                qDebug() << testfloats[0] << testfloats[1] << testfloats[2] << testfloats[3];
-
-//                qDebug() << unpack(testfloats) << floatval;
-
-//                unsigned intval = 0;//0x880000FF;
-//                memcpy(&intval, &floatval, sizeof(unsigned));
-
-//                unsigned blue   =   intval & 0x000000FF;
-//                unsigned green =   (intval & 0x0000FF00) >> 8;
-//                unsigned red  =    (intval & 0x00FF0000) >> 16;
-//                unsigned alpha =   (intval & 0xFF000000) >> 24;
-
-
-//                qDebug() << red << green << blue << alpha;
-
-//                float fred,fblue, fgreen, falpha;
-
-//                memcpy(&fred, &red, sizeof(float));
-//                memcpy(&fblue, &blue, sizeof(float));
-//                memcpy(&fgreen, &green, sizeof(float));
-//                memcpy(&falpha, &alpha, sizeof(float));
-
-//                float colors[4];
-//                colors[0] = red / 255.0f;
-//                colors[1] = green / 255.0f;
-//                colors[2] = blue / 255.0f;
-//                colors[3] = alpha / 255.0f;
-
-//                float result = unpack(colors);
-
-//                qDebug() << result << "vs" << floatval;
-
-
-//                qDebug() << fred << fgreen << fblue << falpha;
-
-
-//                 // Verify calculation
-
-//                unsigned rgbaint = (alpha << 24) + (red << 16) + (green << 8) + blue;
-//                float newFloatVal = 0;
-//                memcpy(&newFloatVal, &rgbaint, sizeof(float));
-//                Q_ASSERT(intval == rgbaint);
-//                Q_ASSERT(abs(newFloatVal - floatval < 0.000001));
+                pack(normalizedVal, floats);
 
                 // Things go wrong when alpha is 0, so make sure to use the largest value for alpha
 

@@ -64,8 +64,8 @@ Rectangle
         id: shader
         z: 0
         property variant prevSource: shaderOutput
-        property variant feedbackGain:    0.3
-        property real freq : 0.5
+        property variant feedbackGain:    0.7
+        property real freq : 0.1
         property real time : 0
 
         property variant audioDataImage: audioTexture
@@ -140,17 +140,19 @@ Rectangle
 
                               highp float colorVal = DecodeFloatRGBA(texture2D(audioDataImage, vec2(timebase, 0.0)).abgr);
                               highp float sampleValue = (colorVal * 2.0) - 1.0;
+                              highp float absSample = abs(sampleValue);
                               highp vec4 feedback = texture2D(prevSource, 0.999 * uv - vec2(0.0,0.004));
-                              highp float osc1 = 0.5 + 0.5 * sin(6.283185 * (0.02 * time + 1.0 * timebase + freq * 1.0 * length(feedback.rgb)));
+                              highp float osc1 = 0.5 + 0.5 * sin(6.283185 * (0.02 * time + 1.0 * timebase + currentValue * 1.0 * length(feedback.rgb)));
                               highp float osc2 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 2.0 * lines * timebase + 0.9 * osc1));
                               highp float osc3 = 0.5 + 0.5 * sin(6.283185 * (0.1 * time + 2.999 * lines * timebase + 0.9 * osc2));
-                              gl_FragColor = mix(1.75 * vec4(sampleValue , osc2, osc1, 0.9), feedback, 0.7);
+                              gl_FragColor = mix(1.75 * vec4(colorVal * osc3, colorVal * osc2, colorVal * osc1, 0.9), feedback, feedbackGain);
 
+//                              Inspect image and values for debugging
 //                              gl_FragColor = vec4(1.0, 0.0, colorVal, 1.0);
 //                              gl_FragColor = texture2D(audioDataImage, vec2(timebase, 0.0)).abgr;
 //
 //                            // Soundwave, for debugging
-//                            float wave = texture2D(audioDataImage, vec2(uv.x, 0)).x;
+//                            float wave = texture2D(audioDataImage, vec2(uv.x, 0)).w;
 //                            vec3 col = vec3(0, 0, 0);
 //                            col += 1.0 -  smoothstep( 0.0, 0.15, abs(wave - uv.y) );
 //                            gl_FragColor = qt_Opacity * vec4(col, 1.0);

@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     audioEngine.moveToThread(&audioThread);
     QObject::connect(&audioThread, &QThread::started, &audioEngine, [&]()
     {
-        //audioEngine.startToneGenerator();
+//        audioEngine.startToneGenerator();
 
         const auto& args = QGuiApplication::arguments();
         if (args.count() > 1)
