@@ -85,17 +85,21 @@ int main(int argc, char *argv[])
         fftThread.exit(0);
     });
 
+    QQmlApplicationEngine engine;
 
     FFTVisualizationData fftVisualization(fftResultQueue);
-    BufferTextureProvider bufferTextureProvider;
-    SampleVisualizationData sampleVisualization(sampleQueue, bufferTextureProvider);
+
+    // This must be a pointer, since the QML Engine takes ownership of it
+    // It will be freed by the QML Engine, if it's not a pointer, it will be double free-d.
+
+    BufferTextureProvider* bufferTextureProvider = new BufferTextureProvider();
+    SampleVisualizationData sampleVisualization(sampleQueue, *bufferTextureProvider);
+
+    engine.addImportPath(":/qml/");
+    engine.addImageProvider(QStringLiteral("buffer"), bufferTextureProvider);
 
     qmlRegisterType<QQmlVariantListModel>("visualizer.models", 1, 0, "QQmlVariantListModel");
     qmlRegisterUncreatableType<SampleVisualizationData>("visualizer.models", 1, 0, "SampleVisualizationData", "Reasons");
-
-    QQmlApplicationEngine engine;
-    engine.addImportPath(":/qml/");
-    engine.addImageProvider(QStringLiteral("buffer"), &bufferTextureProvider);
 
     engine.rootContext()->setContextProperty(QStringLiteral("fftData"), fftVisualization.getModel());
     engine.rootContext()->setContextProperty(QStringLiteral("sampleData"), &sampleVisualization);

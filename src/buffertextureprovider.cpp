@@ -8,7 +8,6 @@ BufferTextureProvider::BufferTextureProvider()
     : QQuickImageProvider(QQmlImageProviderBase::Image),
       m_image(QSize(Visualizer::Common::nrSamples, 1), QImage::Format_ARGB32)
 {
-
 }
 
 
