@@ -16,10 +16,10 @@
 AudioEngine::AudioEngine(Visualizer::Common::fft_queue_t& eventQueue,
                          Visualizer::Common::sample_queue_t& sampleEventQueue,
                          QObject* parent)
-    : QObject(parent)
-    , m_toneBuffer (new char[s_toneBufferSize])
-    , m_fftEventQueue(eventQueue)
-    , m_sampleEventQueue(sampleEventQueue)
+    : QObject(parent),
+      m_toneBuffer (new char[s_toneBufferSize]),
+      m_fftEventQueue(eventQueue),
+      m_sampleEventQueue(sampleEventQueue)
 {
     m_toneTimer.setParent(this);
     m_fileWriter.setParent(this);

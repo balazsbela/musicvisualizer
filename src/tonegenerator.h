@@ -26,6 +26,6 @@ private:
 private:
 
     qreal m_phase = 0.0;
-    qint64 m_pos;
+    qint64 m_pos = 0;
     QByteArray m_buffer;
 };

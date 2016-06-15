@@ -87,19 +87,17 @@ int main(int argc, char *argv[])
 
 
     FFTVisualizationData fftVisualization(fftResultQueue);
-    SampleVisualizationData sampleVisualization(sampleQueue);
-
-    QSharedPointer<QImage> image(new QImage(QSize(Visualizer::Common::nrSamples, 1), QImage::Format_ARGB32));
-    sampleVisualization.getBufferTextureProvider()->setImage(image);
+    BufferTextureProvider bufferTextureProvider;
+    SampleVisualizationData sampleVisualization(sampleQueue, bufferTextureProvider);
 
     qmlRegisterType<QQmlVariantListModel>("visualizer.models", 1, 0, "QQmlVariantListModel");
     qmlRegisterUncreatableType<SampleVisualizationData>("visualizer.models", 1, 0, "SampleVisualizationData", "Reasons");
 
-
     QQmlApplicationEngine engine;
     engine.addImportPath(":/qml/");
+    engine.addImageProvider(QStringLiteral("buffer"), &bufferTextureProvider);
+
     engine.rootContext()->setContextProperty(QStringLiteral("fftData"), fftVisualization.getModel());
-    engine.addImageProvider(QStringLiteral("buffer"), sampleVisualization.getBufferTextureProvider());
     engine.rootContext()->setContextProperty(QStringLiteral("sampleData"), &sampleVisualization);
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

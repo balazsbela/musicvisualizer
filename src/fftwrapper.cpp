@@ -11,9 +11,9 @@
 FFTWrapper::FFTWrapper(Visualizer::Common::fft_queue_t& inQueue,
                        Visualizer::Common::fft_result_queue_t& outQueue,
                        QObject* parent)
-    : QObject(parent)
-    , m_inQueue(inQueue)
-    , m_outQueue(outQueue)
+    : QObject(parent),
+      m_inQueue(inQueue),
+      m_outQueue(outQueue)
 {
     m_pullTimer.setParent(this);
 }

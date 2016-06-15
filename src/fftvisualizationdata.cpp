@@ -3,8 +3,8 @@
 
 FFTVisualizationData::FFTVisualizationData(Visualizer::Common::fft_result_queue_t& queue,
                                            QObject* parent)
-    : QObject(parent)
-    , m_queue(queue)
+    : QObject(parent),
+      m_queue(queue)
 {
     m_model.setParent(this);
     m_timer.setParent(this);

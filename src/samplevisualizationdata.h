@@ -17,6 +17,7 @@ Q_OBJECT;
 public:
 
     SampleVisualizationData(Visualizer::Common::sample_queue_t& queue,
+                            BufferTextureProvider&  bufferTextureProvider,
                             QObject* parent = nullptr);
 
     ~SampleVisualizationData() = default;
@@ -26,11 +27,6 @@ public:
         return &m_model;
     }
 
-    Q_INVOKABLE BufferTextureProvider* getBufferTextureProvider()
-    {
-        return &m_bufferTextureProvider;
-    }
-
 
 private:
 
@@ -38,6 +34,6 @@ private:
     QTimer m_timer;
 
     QQmlVariantListModel        m_model;
-    BufferTextureProvider       m_bufferTextureProvider;
+    BufferTextureProvider&      m_bufferTextureProvider;
 
 };

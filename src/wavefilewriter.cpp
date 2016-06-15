@@ -78,8 +78,8 @@ static const int HeaderLength = sizeof(CombinedHeader);
 
 
 WaveFileWriter::WaveFileWriter(QObject *parent)
-    : QObject(parent)
-    , m_dataLength(0)
+    : QObject(parent),
+      m_dataLength(0)
 {
 }
 

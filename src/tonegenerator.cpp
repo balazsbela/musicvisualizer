@@ -64,8 +64,7 @@ ToneGenerator::ToneGenerator(const QAudioFormat &format,
                      qint64 durationUs,
                      int sampleRate,
                      QObject *parent)
-    :   QIODevice(parent)
-    ,   m_pos(0)
+    : QIODevice(parent)
 {
     if (format.isValid())
     {

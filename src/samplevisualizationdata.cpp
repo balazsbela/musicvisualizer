@@ -40,9 +40,11 @@ float unpack (const float* rgba)
 
 
 SampleVisualizationData::SampleVisualizationData(Visualizer::Common::sample_queue_t& queue,
+                                                 BufferTextureProvider& bufferTextureProvider,
                                                  QObject* parent)
-    : QObject(parent)
-    , m_queue(queue)
+    : QObject(parent),
+      m_queue(queue),
+      m_bufferTextureProvider(bufferTextureProvider)
 {
     m_model.setParent(this);
     m_timer.setParent(this);

@@ -18,13 +18,8 @@ public:
     void setPixel(const QPoint &position, uint color);
     void setPixel(const QPoint &position, const QColor& color) ;
 
-    void setImage(QSharedPointer<QImage> image)
-    {
-        m_image = image;
-    }
-
 private:
 
-    QSharedPointer<QImage> m_image;
+    QImage m_image;
 
 };
