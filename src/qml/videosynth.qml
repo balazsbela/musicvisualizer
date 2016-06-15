@@ -24,16 +24,38 @@ Rectangle
 
     Connections
     {
-        target: sampleData
+        target: sampleData.getModel()
         onModelReset:
         {
-          bufferSize = sampleData.count;
-          for (var i = 0; i < sampleData.count; ++i)
+          bufferSize = sampleData.getModel().count;
+          for (var i = 0; i < bufferSize; ++i)
           {
-            var item = sampleData.get(i);
+            var item = sampleData.getModel().get(i);
             newBuffer[i] = item.val;
           }
+
+          image.reload();
         }
+    }
+
+    Image
+    {
+        id: image;
+        source: "image://buffer/"
+        cache: false
+        function reload()
+        {
+            var oldSource = source;
+            source = "";
+            source = oldSource;
+        }
+    }
+
+    ShaderEffectSource
+    {
+        id: audioTexture
+        hideSource: true
+        sourceItem: image
     }
 
 
@@ -45,6 +67,8 @@ Rectangle
         property variant feedbackGain:    0.3
         property real freq : 0.5
         property real time : 0
+
+        property variant audioDataImage: audioTexture
 
         property real currentValue
         property int bufferIndex
@@ -100,18 +124,36 @@ Rectangle
                           uniform highp float frameWidth;
                           uniform highp float frameHeight;
                           uniform highp float currentValue;
+                          uniform sampler2D audioDataImage;
+
+                          highp float DecodeFloatRGBA( vec4 val )
+                          {
+                            // Same as the bit shifting
+                            return dot( val, vec4(1.0, 1.0 / 255.0, 1.0 / 65025.0, 1.0 / 160581375.0) );
+                          }
 
                           void main()
                           {
-                              highp float modulationValue = currentValue + 0.5;
-                              highp float modulationAbsoluteValue = abs(currentValue) + 0.5;
                               highp vec2 uv = qt_TexCoord0;
-                              highp vec4 feedback = texture2D(prevSource, 0.999 * uv - vec2(0.0,0.004));
+
                               highp float timebase = (floor(lines * uv.y) + uv.x)/lines;
-                              highp float osc1 = 0.5 + 0.5 * sin(6.283185 * (0.02 * time + 1.0 * timebase + modulationValue * 1.0 * length(feedback.rgb)));
+
+                              highp float colorVal = DecodeFloatRGBA(texture2D(audioDataImage, vec2(timebase, 0.0)).abgr);
+                              highp float sampleValue = (colorVal * 2.0) - 1.0;
+                              highp vec4 feedback = texture2D(prevSource, 0.999 * uv - vec2(0.0,0.004));
+                              highp float osc1 = 0.5 + 0.5 * sin(6.283185 * (0.02 * time + 1.0 * timebase + freq * 1.0 * length(feedback.rgb)));
                               highp float osc2 = 0.5 + 0.5 * sin(6.283185 * (0.01 * time + 2.0 * lines * timebase + 0.9 * osc1));
                               highp float osc3 = 0.5 + 0.5 * sin(6.283185 * (0.1 * time + 2.999 * lines * timebase + 0.9 * osc2));
-                              gl_FragColor = mix(1.75 * vec4(modulationAbsoluteValue * osc3 , modulationAbsoluteValue * osc1, modulationAbsoluteValue * osc2, 0.9), feedback, 0.7);
+                              gl_FragColor = mix(1.75 * vec4(sampleValue , osc2, osc1, 0.9), feedback, 0.7);
+
+//                              gl_FragColor = vec4(1.0, 0.0, colorVal, 1.0);
+//                              gl_FragColor = texture2D(audioDataImage, vec2(timebase, 0.0)).abgr;
+//
+//                            // Soundwave, for debugging
+//                            float wave = texture2D(audioDataImage, vec2(uv.x, 0)).x;
+//                            vec3 col = vec3(0, 0, 0);
+//                            col += 1.0 -  smoothstep( 0.0, 0.15, abs(wave - uv.y) );
+//                            gl_FragColor = qt_Opacity * vec4(col, 1.0);
                           }"
     }
 

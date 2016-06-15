@@ -11,6 +11,7 @@
 #include "fftwrapper.h"
 #include "fftvisualizationdata.h"
 #include "samplevisualizationdata.h"
+#include "buffertextureprovider.h"
 
 
 int main(int argc, char *argv[])
@@ -34,6 +35,9 @@ int main(int argc, char *argv[])
     Visualizer::Common::fft_result_queue_t fftResultQueue(0);
     Visualizer::Common::sample_queue_t sampleQueue(0);
 
+    Q_ASSERT(bufferQueue.is_lock_free());
+    Q_ASSERT(fftResultQueue.is_lock_free());
+    Q_ASSERT(sampleQueue.is_lock_free());
 
     // Start audio thread
 
@@ -42,7 +46,7 @@ int main(int argc, char *argv[])
     audioEngine.moveToThread(&audioThread);
     QObject::connect(&audioThread, &QThread::started, &audioEngine, [&]()
     {
-        // audioEngine.startToneGenerator();
+        //audioEngine.startToneGenerator();
 
         const auto& args = QGuiApplication::arguments();
         if (args.count() > 1)
@@ -85,14 +89,18 @@ int main(int argc, char *argv[])
     FFTVisualizationData fftVisualization(fftResultQueue);
     SampleVisualizationData sampleVisualization(sampleQueue);
 
+    QSharedPointer<QImage> image(new QImage(QSize(Visualizer::Common::nrSamples, 1), QImage::Format_ARGB32));
+    sampleVisualization.getBufferTextureProvider()->setImage(image);
+
     qmlRegisterType<QQmlVariantListModel>("visualizer.models", 1, 0, "QQmlVariantListModel");
+    qmlRegisterUncreatableType<SampleVisualizationData>("visualizer.models", 1, 0, "SampleVisualizationData", "Reasons");
+
 
     QQmlApplicationEngine engine;
     engine.addImportPath(":/qml/");
     engine.rootContext()->setContextProperty(QStringLiteral("fftData"), fftVisualization.getModel());
-    engine.rootContext()->setContextProperty(QStringLiteral("sampleData"), sampleVisualization.getModel());
-
-    //engine.load(QUrl(QStringLiteral("qrc:/qml/videosynth.qml")));
+    engine.addImageProvider(QStringLiteral("buffer"), sampleVisualization.getBufferTextureProvider());
+    engine.rootContext()->setContextProperty(QStringLiteral("sampleData"), &sampleVisualization);
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
 
